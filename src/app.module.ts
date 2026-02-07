@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { validateEnv } from './utils/validators/env-validator';
 import { EnvironmentVariables } from './utils/env.dto';
 import { HealthCheckModule } from './health-check/health-check.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { HealthCheckModule } from './health-check/health-check.module';
       validate: (config) => validateEnv(config, EnvironmentVariables),
     }),
     HealthCheckModule,
+    DatabaseModule,
   ],
   controllers: [],
   providers: [],

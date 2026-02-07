@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive, IsString, IsUrl } from 'class-validator';
 
 export class EnvironmentVariables {
   @IsString()
@@ -13,4 +13,11 @@ export class EnvironmentVariables {
   @IsNotEmpty()
   @IsPositive()
   readonly HTTP_PORT: number;
+
+  @IsUrl(
+    { protocols: ['mysql'], require_tld: false, require_protocol: true },
+    { message: 'DATABASE_URL must be a valid MySQL URL' },
+  )
+  @IsNotEmpty()
+  readonly DATABASE_URL: string;
 }

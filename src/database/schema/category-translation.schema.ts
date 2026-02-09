@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
 import { category } from './category.schema';
+import { languageEnum } from './language.enum';
 
 export const categoryTranslation = mysqlTable(
   'category_translation',
@@ -11,7 +12,7 @@ export const categoryTranslation = mysqlTable(
     categoryId: varchar('category_id', { length: 36 })
       .notNull()
       .references(() => category.id, { onDelete: 'cascade' }),
-    language: varchar({ length: 10, enum: ['en', 'ua', 'ru', 'de'] }).notNull(),
+    language: varchar({ length: 10, enum: languageEnum }).notNull(),
     title: varchar({ length: 255 }).notNull(),
     description: varchar({ length: 255 }),
   },
@@ -24,3 +25,6 @@ export const categoryTranslationRelations = relations(categoryTranslation, ({ on
     references: [category.id],
   }),
 }));
+
+export type CategoryTranslation = typeof categoryTranslation.$inferSelect;
+export type NewCategoryTranslation = typeof categoryTranslation.$inferInsert;

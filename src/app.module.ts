@@ -5,6 +5,7 @@ import { validateEnv } from './utils/validators/env-validator';
 import { EnvironmentVariables } from './utils/env.dto';
 import { HealthCheckModule } from './health-check/health-check.module';
 import { DatabaseModule } from './database/database.module';
+import { StoreCategoryModule } from './store-category/store-category.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DatabaseModule } from './database/database.module';
     }),
     HealthCheckModule,
     DatabaseModule,
+    StoreCategoryModule,
   ],
   controllers: [],
   providers: [],

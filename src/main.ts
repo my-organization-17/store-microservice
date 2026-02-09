@@ -6,6 +6,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import { GrpcExceptionFilter } from './utils/filters/grpc-exception.filter';
 import { HEALTH_CHECK_V1_PACKAGE_NAME } from './generated-types/health-check';
+import { STORE_CATEGORY_V1_PACKAGE_NAME } from './generated-types/store-category';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -23,14 +24,14 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [HEALTH_CHECK_V1_PACKAGE_NAME],
-      protoPath: ['proto/health-check.proto'],
+      package: [HEALTH_CHECK_V1_PACKAGE_NAME, STORE_CATEGORY_V1_PACKAGE_NAME],
+      protoPath: ['proto/health-check.proto', 'proto/store-category.proto'],
       url,
     },
   });
 
   await app.startAllMicroservices();
   await app.listen(PORT);
-  logger.log('User microservice is running on ' + url);
+  logger.log('Store microservice is running on ' + url);
 }
 void bootstrap();

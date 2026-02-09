@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
 import { item } from './item.schema';
+import { languageEnum } from './language.enum';
 
 export const itemTranslation = mysqlTable(
   'item_translation',
@@ -11,7 +12,7 @@ export const itemTranslation = mysqlTable(
     itemId: varchar('item_id', { length: 36 })
       .notNull()
       .references(() => item.id, { onDelete: 'cascade' }),
-    language: varchar({ length: 10, enum: ['en', 'ua', 'ru', 'de'] }).notNull(),
+    language: varchar({ length: 10, enum: languageEnum }).notNull(),
     title: varchar({ length: 255 }).notNull(),
     description: varchar({ length: 255 }),
     detailedDescription: text('detailed_description'),

@@ -18,3 +18,6 @@ export const categoryRelations = relations(category, ({ many }) => ({
   items: many(item),
   attributes: many(attribute),
 }));
+
+export type Category = typeof category.$inferSelect;
+export type NewCategory = typeof category.$inferInsert;

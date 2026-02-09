@@ -8,3 +8,4 @@ export * from './category-translation.schema';
 export * from './item-translation.schema';
 export * from './attribute-translation.schema';
 export * from './item-attribute-translation.schema';
+export * from './language.enum';

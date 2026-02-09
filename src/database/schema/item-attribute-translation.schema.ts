@@ -3,13 +3,14 @@ import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
 import { itemAttribute } from './item-attribute.schema';
+import { languageEnum } from './language.enum';
 
 export const itemAttributeTranslation = mysqlTable(
   'item_attribute_translation',
   {
     ...baseColumns,
     itemAttributeId: varchar('item_attribute_id', { length: 36 }).notNull(),
-    language: varchar({ length: 10, enum: ['en', 'ua', 'ru', 'de'] }).notNull(),
+    language: varchar({ length: 10, enum: languageEnum }).notNull(),
     value: varchar({ length: 255 }).notNull(),
   },
   (table) => [

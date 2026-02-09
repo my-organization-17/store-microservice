@@ -1,9 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { drizzle, MySqlRawQueryResult } from 'drizzle-orm/mysql2';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, max, asc } from 'drizzle-orm';
 
 import * as schema from 'src/database/schema';
-import { UpdateStoreCategoryRequest } from 'src/generated-types/store-category';
+import { DEFAULT_LANGUAGE } from 'src/database/language.enum';
+import type { UpdateStoreCategoryRequest } from 'src/generated-types/store-category';
 import type { LanguageEnum } from 'src/database/language.enum';
 
 @Injectable()
@@ -26,7 +27,9 @@ export class StoreCategoryRepository {
   // find all store categories
   async findStoreCategoryList(): Promise<schema.Category[]> {
     this.logger.debug(`Finding all store categories`);
-    return await this.drizzleDb.query.category.findMany();
+    return await this.drizzleDb.query.category.findMany({
+      orderBy: asc(schema.category.sortOrder),
+    });
   }
 
   // find store category by its id with translations
@@ -54,6 +57,7 @@ export class StoreCategoryRepository {
           where: eq(schema.categoryTranslation.language, language),
         },
       },
+      orderBy: asc(schema.category.sortOrder),
     });
   }
 
@@ -61,36 +65,37 @@ export class StoreCategoryRepository {
   async getDefaultTranslationForCategory(categoryId: string): Promise<schema.CategoryTranslation | null> {
     this.logger.debug(`Getting default translation for store category with id: ${categoryId}`);
     const result = await this.drizzleDb.query.categoryTranslation.findFirst({
-      where: and(eq(schema.categoryTranslation.categoryId, categoryId), eq(schema.categoryTranslation.language, 'en')),
+      where: and(
+        eq(schema.categoryTranslation.categoryId, categoryId),
+        eq(schema.categoryTranslation.language, DEFAULT_LANGUAGE),
+      ),
     });
     return result ?? null;
   }
 
-  async createStoreCategory(data: {
-    slug: string;
-    sortOrder: number;
-    isAvailable?: boolean;
-  }): Promise<Array<{ id: string }>> {
+  // create store category, the sort order will be set to the maximum sort order of existing categories plus one
+  async createStoreCategory(data: { slug: string; isAvailable?: boolean }): Promise<Array<{ id: string }>> {
     this.logger.debug(`Creating store category with data: ${JSON.stringify(data)}`);
-    return await this.drizzleDb.insert(schema.category).values(data).$returningId();
+    return await this.drizzleDb.transaction(async (tx) => {
+      const [{ maxOrder }] = await tx.select({ maxOrder: max(schema.category.sortOrder) }).from(schema.category);
+      const nextSortOrder = (maxOrder ?? 0) + 1;
+      return await tx
+        .insert(schema.category)
+        .values({ ...data, sortOrder: nextSortOrder })
+        .$returningId();
+    });
   }
 
-  // update store category by its id, if the category does not exist, it will be created
+  // update store category by its id
   async updateStoreCategory(data: UpdateStoreCategoryRequest): Promise<MySqlRawQueryResult> {
     this.logger.debug(`Updating store category with data: ${JSON.stringify(data)}`);
     return await this.drizzleDb
-      .insert(schema.category)
-      .values({
-        id: data.id,
-        slug: data.slug ?? '',
+      .update(schema.category)
+      .set({
+        ...(data.slug !== undefined && data.slug !== null && { slug: data.slug }),
         ...(data.isAvailable !== undefined && data.isAvailable !== null && { isAvailable: data.isAvailable }),
       })
-      .onDuplicateKeyUpdate({
-        set: {
-          ...(data.slug !== undefined && data.slug !== null && { slug: data.slug }),
-          ...(data.isAvailable !== undefined && data.isAvailable !== null && { isAvailable: data.isAvailable }),
-        },
-      });
+      .where(eq(schema.category.id, data.id));
   }
 
   // delete store category by its id and update positions of remaining categories

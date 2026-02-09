@@ -36,18 +36,15 @@ export class StoreCategoryService {
           isAvailable: category.isAvailable,
           sortOrder: category.sortOrder,
         },
-        translation:
-          category.translations.length > 0
-            ? category.translations.map((t) => ({
-                id: t.id,
-                title: t.title,
-                description: t.description ?? '',
-                language: t.language,
-              }))
-            : [],
+        translation: category.translations.map((tx) => ({
+          id: tx.id,
+          title: tx.title,
+          description: tx.description ?? '',
+          language: tx.language,
+        })),
       };
     } catch (error) {
-      this.logger.error(`Error fetching full menu: ${error instanceof Error ? error.message : error}`);
+      this.logger.error(`Error fetching store category: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;
       throw AppError.internalServerError('Failed to retrieve store category');
     }
@@ -63,16 +60,19 @@ export class StoreCategoryService {
         throw AppError.notFound('No store categories found');
       }
 
-      if (categories.every((category) => category.translations.length === 0)) {
-        this.logger.warn(`No translations found for any store categories in language: ${language}`);
-        const defaultTranslations = await Promise.all(
-          categories.map((category) => this.storeCategoryRepository.getDefaultTranslationForCategory(category.id)),
+      const categoriesWithoutTranslation = categories.filter((category) => category.translations.length === 0);
+      if (categoriesWithoutTranslation.length > 0) {
+        this.logger.warn(
+          `No translations found for ${categoriesWithoutTranslation.length} store categories in language: ${language}`,
         );
-        defaultTranslations.forEach((translation, index) => {
-          if (translation) {
-            categories[index].translations.push(translation);
-          }
-        });
+        await Promise.all(
+          categoriesWithoutTranslation.map(async (category) => {
+            const translation = await this.storeCategoryRepository.getDefaultTranslationForCategory(category.id);
+            if (translation) {
+              category.translations.push(translation);
+            }
+          }),
+        );
       }
 
       const data = categories.map((category) => ({
@@ -86,7 +86,7 @@ export class StoreCategoryService {
 
       return { data };
     } catch (error) {
-      this.logger.error(`Error fetching full menu: ${error instanceof Error ? error.message : error}`);
+      this.logger.error(`Error fetching store category list: ${error instanceof Error ? error.message : error}`);
       if (error instanceof AppError) throw error;
       throw AppError.internalServerError('Failed to retrieve store categories');
     }
@@ -95,14 +95,8 @@ export class StoreCategoryService {
   async createStoreCategory(data: CreateStoreCategoryRequest): Promise<Id> {
     this.logger.debug(`Creating store category with data: ${JSON.stringify(data)}`);
     try {
-      const categoryList = await this.storeCategoryRepository.findStoreCategoryList();
-      const maxSortOrder = categoryList.reduce(
-        (max, category) => (category.sortOrder > max ? category.sortOrder : max),
-        0,
-      );
       const result = await this.storeCategoryRepository.createStoreCategory({
         slug: data.slug,
-        sortOrder: maxSortOrder + 1,
         isAvailable: data.isAvailable ?? true,
       });
       this.logger.debug(`Store category created with id: ${JSON.stringify(result)}`);
@@ -116,6 +110,11 @@ export class StoreCategoryService {
   async updateStoreCategory(data: UpdateStoreCategoryRequest): Promise<Id> {
     this.logger.debug(`Updating store category with data: ${JSON.stringify(data)}`);
     try {
+      const existing = await this.storeCategoryRepository.findStoreCategoryById(data.id);
+      if (!existing) {
+        this.logger.warn(`Store category with id: ${data.id} not found`);
+        throw AppError.notFound('Store category not found');
+      }
       await this.storeCategoryRepository.updateStoreCategory(data);
       return { id: data.id };
     } catch (error) {
@@ -157,6 +156,10 @@ export class StoreCategoryService {
       if (!categoryToUpdate) {
         this.logger.warn(`Store category with id: ${data.id} not found`);
         throw AppError.notFound('Store category not found');
+      }
+      if (data.sortOrder < 1 || data.sortOrder > categoryList.length) {
+        this.logger.warn(`Invalid sort order: ${data.sortOrder}, must be between 1 and ${categoryList.length}`);
+        throw AppError.badRequest(`Sort order must be between 1 and ${categoryList.length}`);
       }
       const positionUpdates = this.calculatePositionUpdates(categoryList, categoryToUpdate, data.sortOrder);
       await this.storeCategoryRepository.changeStoreCategoryPosition(data.id, positionUpdates);

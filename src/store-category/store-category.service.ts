@@ -29,7 +29,6 @@ export class StoreCategoryService {
         this.logger.warn(`Store category with id: ${id} not found`);
         throw AppError.notFound('Store category not found');
       }
-      this.logger.debug(`Store category with id: ${id} found: ${JSON.stringify(category)}`);
       return {
         category: {
           id: category.id,
@@ -59,6 +58,23 @@ export class StoreCategoryService {
     try {
       const categories = await this.storeCategoryRepository.findStoreCategoryListWithTranslation(language);
 
+      if (categories.length === 0) {
+        this.logger.warn(`No store categories found for language: ${language}`);
+        throw AppError.notFound('No store categories found');
+      }
+
+      if (categories.every((category) => category.translations.length === 0)) {
+        this.logger.warn(`No translations found for any store categories in language: ${language}`);
+        const defaultTranslations = await Promise.all(
+          categories.map((category) => this.storeCategoryRepository.getDefaultTranslationForCategory(category.id)),
+        );
+        defaultTranslations.forEach((translation, index) => {
+          if (translation) {
+            categories[index].translations.push(translation);
+          }
+        });
+      }
+
       const data = categories.map((category) => ({
         id: category.id,
         slug: category.slug,
@@ -71,6 +87,7 @@ export class StoreCategoryService {
       return { data };
     } catch (error) {
       this.logger.error(`Error fetching full menu: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
       throw AppError.internalServerError('Failed to retrieve store categories');
     }
   }

@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { drizzle, MySqlRawQueryResult } from 'drizzle-orm/mysql2';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 import * as schema from 'src/database/schema';
 import { UpdateStoreCategoryRequest } from 'src/generated-types/store-category';
@@ -51,6 +51,14 @@ export class StoreCategoryRepository {
         },
       },
     });
+  }
+
+  async getDefaultTranslationForCategory(categoryId: string): Promise<schema.CategoryTranslation | null> {
+    this.logger.debug(`Getting default translation for store category with id: ${categoryId}`);
+    const result = await this.drizzleDb.query.categoryTranslation.findFirst({
+      where: and(eq(schema.categoryTranslation.categoryId, categoryId), eq(schema.categoryTranslation.language, 'en')),
+    });
+    return result ?? null;
   }
 
   async createStoreCategory(data: {

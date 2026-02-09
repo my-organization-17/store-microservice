@@ -48,7 +48,7 @@ export class StoreCategoryController {
   @GrpcMethod(STORE_CATEGORY_SERVICE_NAME, 'DeleteStoreCategory')
   async deleteStoreCategory(data: Id): Promise<StatusResponse> {
     this.logger.debug(`Received request to delete store category with id: ${data.id}`);
-    return await this.storeCategoryService.deleteStoreCategory(data.id);
+    return await this.storeCategoryService.deleteStoreCategoryWithPositionUpdate(data.id);
   }
 
   @GrpcMethod(STORE_CATEGORY_SERVICE_NAME, 'ChangeStoreCategoryPosition')

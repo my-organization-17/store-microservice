@@ -93,10 +93,23 @@ export class StoreCategoryRepository {
       });
   }
 
-  // delete store category by its id
-  async deleteStoreCategory(id: string): Promise<MySqlRawQueryResult> {
-    this.logger.debug(`Deleting store category with id: ${id}`);
-    return await this.drizzleDb.delete(schema.category).where(eq(schema.category.id, id));
+  // delete store category by its id and update positions of remaining categories
+  async deleteStoreCategoryWithPositionUpdate(
+    id: string,
+    positionUpdates: Array<{ id: string; position: number }> = [],
+  ): Promise<void> {
+    this.logger.debug(
+      `Deleting store category with id: ${id} and position updates: ${JSON.stringify(positionUpdates)}`,
+    );
+    await this.drizzleDb.transaction(async (tx) => {
+      // Delete the category first
+      await tx.delete(schema.category).where(eq(schema.category.id, id));
+
+      // Update positions of remaining categories
+      for (const update of positionUpdates) {
+        await tx.update(schema.category).set({ sortOrder: update.position }).where(eq(schema.category.id, update.id));
+      }
+    });
   }
 
   // change position of store category by its id, the sortOrderUpdates is an array of objects with id and position, the position is the new sort order for the category with the given id

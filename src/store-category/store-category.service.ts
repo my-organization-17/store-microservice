@@ -125,20 +125,27 @@ export class StoreCategoryService {
     }
   }
 
-  async deleteStoreCategory(id: string): Promise<StatusResponse> {
-    this.logger.debug(`Deleting store category with id: ${id}`);
+  async deleteStoreCategoryWithPositionUpdate(id: string): Promise<StatusResponse> {
+    this.logger.debug(`Deleting store category with id: ${id} and updating positions`);
     try {
-      const result = await this.storeCategoryRepository.deleteStoreCategory(id);
-      if (result[0].affectedRows === 0) {
+      const categoryList = await this.storeCategoryRepository.findStoreCategoryList();
+      const categoryToDelete = categoryList.find((category) => category.id === id);
+      if (!categoryToDelete) {
         this.logger.warn(`Store category with id: ${id} not found`);
         throw AppError.notFound('Store category not found');
       }
-      this.logger.debug(`Store category with id: ${id} deleted successfully`);
-      return { success: true, message: 'Store category deleted successfully' };
+      const positionUpdates = categoryList
+        .filter((category) => category.sortOrder > categoryToDelete.sortOrder)
+        .map((category) => ({ id: category.id, position: category.sortOrder - 1 }));
+      await this.storeCategoryRepository.deleteStoreCategoryWithPositionUpdate(id, positionUpdates);
+      this.logger.debug(`Store category with id: ${id} deleted successfully with position updates`);
+      return { success: true, message: 'Store category deleted successfully with position updates' };
     } catch (error) {
-      this.logger.error(`Error deleting store category: ${error instanceof Error ? error.message : error}`);
+      this.logger.error(
+        `Error deleting store category with position update: ${error instanceof Error ? error.message : error}`,
+      );
       if (error instanceof AppError) throw error;
-      throw AppError.internalServerError('Failed to delete store category');
+      throw AppError.internalServerError('Failed to delete store category with position update');
     }
   }
 

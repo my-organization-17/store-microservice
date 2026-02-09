@@ -9,13 +9,17 @@ service StoreCategoryService {
   // rpc to get a store category by its ID
   rpc GetStoreCategoryById(Id) returns (StoreCategoryWithTranslation) {}
   // rpc to create a new store category
-  rpc CreateStoreCategory(CreateStoreCategoryRequest) returns (StoreCategory) {}
+  rpc CreateStoreCategory(CreateStoreCategoryRequest) returns (Id) {}
   // rpc to update an existing store category
-  rpc UpdateStoreCategory(UpdateStoreCategoryRequest) returns (StoreCategory) {}
-  // rpc to change the position of a store category
-  rpc ChangeStoreCategoryPosition(ChangeStoreCategoryPositionRequest) returns (StoreCategory) {}
+  rpc UpdateStoreCategory(UpdateStoreCategoryRequest) returns (Id) {}
   // rpc to delete a store category by its ID
   rpc DeleteStoreCategory(Id) returns (StatusResponse) {}
+  // rpc to change the position of a store category
+  rpc ChangeStoreCategoryPosition(ChangeStoreCategoryPositionRequest) returns (StoreCategory) {}
+  // rpc to create or update a store category translation
+  rpc UpsertStoreCategoryTranslation(StoreCategoryTranslationRequest) returns (Id) {}
+  // rpc to delete a store category translation by its ID
+  rpc DeleteStoreCategoryTranslation(Id) returns (StatusResponse) {}
 }
 
 // declaration of Language message
@@ -89,6 +93,14 @@ message UpdateStoreCategoryRequest {
 message ChangeStoreCategoryPositionRequest {
   string id = 1;
   int32 sort_order = 2;
+}
+
+// Message for creating or updating a store category translation
+message StoreCategoryTranslationRequest {
+  string category_id = 1;
+  string title = 2;
+  optional string description = 3;
+  string language = 4;
 }
 
 // Command to generate TypeScript code with NestJS options, using null for optional fields and Date for timestamps

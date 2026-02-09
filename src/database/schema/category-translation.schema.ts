@@ -3,7 +3,7 @@ import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
 import { category } from './category.schema';
-import { languageEnum } from './language.enum';
+import { languageEnum } from '../language.enum';
 
 export const categoryTranslation = mysqlTable(
   'category_translation',

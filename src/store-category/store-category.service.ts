@@ -3,18 +3,28 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AppError } from 'src/utils/errors/app-error';
 import { StoreCategoryRepository } from './store.category.repository';
 
-import type { StoreCategoryList, StoreCategoryWithTranslations } from 'src/generated-types/store-category';
-import type { LanguageEnum } from 'src/database/schema';
+import type {
+  ChangeStoreCategoryPositionRequest,
+  CreateStoreCategoryRequest,
+  Id,
+  StatusResponse,
+  StoreCategory,
+  StoreCategoryList,
+  StoreCategoryTranslationRequest,
+  StoreCategoryWithTranslations,
+  UpdateStoreCategoryRequest,
+} from 'src/generated-types/store-category';
+import type { LanguageEnum } from 'src/database/language.enum';
 
 @Injectable()
 export class StoreCategoryService {
   private readonly logger = new Logger(StoreCategoryService.name);
   constructor(private readonly storeCategoryRepository: StoreCategoryRepository) {}
 
-  async findStoreCategoryById(id: string): Promise<StoreCategoryWithTranslations> {
+  async findStoreCategoryByIdWithTranslation(id: string): Promise<StoreCategoryWithTranslations> {
     this.logger.debug(`Finding store category with id: ${id}`);
     try {
-      const category = await this.storeCategoryRepository.findStoreCategoryById(id);
+      const category = await this.storeCategoryRepository.findStoreCategoryByIdWithTranslation(id);
       if (!category) {
         this.logger.warn(`Store category with id: ${id} not found`);
         throw AppError.notFound('Store category not found');
@@ -44,10 +54,10 @@ export class StoreCategoryService {
     }
   }
 
-  async findAllStoreCategoriesWithTranslation(language: LanguageEnum): Promise<StoreCategoryList> {
+  async findStoreCategoryListWithTranslation(language: LanguageEnum): Promise<StoreCategoryList> {
     this.logger.debug(`Finding all store categories with translations for language: ${language}`);
     try {
-      const categories = await this.storeCategoryRepository.findAllStoreCategoriesWithTranslation(language);
+      const categories = await this.storeCategoryRepository.findStoreCategoryListWithTranslation(language);
 
       const data = categories.map((category) => ({
         id: category.id,
@@ -63,5 +73,150 @@ export class StoreCategoryService {
       this.logger.error(`Error fetching full menu: ${error instanceof Error ? error.message : error}`);
       throw AppError.internalServerError('Failed to retrieve store categories');
     }
+  }
+
+  async createStoreCategory(data: CreateStoreCategoryRequest): Promise<Id> {
+    this.logger.debug(`Creating store category with data: ${JSON.stringify(data)}`);
+    try {
+      const categoryList = await this.storeCategoryRepository.findStoreCategoryList();
+      const maxSortOrder = categoryList.reduce(
+        (max, category) => (category.sortOrder > max ? category.sortOrder : max),
+        0,
+      );
+      const result = await this.storeCategoryRepository.createStoreCategory({
+        slug: data.slug,
+        sortOrder: maxSortOrder + 1,
+        isAvailable: data.isAvailable ?? true,
+      });
+      this.logger.debug(`Store category created with id: ${JSON.stringify(result)}`);
+      return result[0];
+    } catch (error) {
+      this.logger.error(`Error creating store category: ${error instanceof Error ? error.message : error}`);
+      throw AppError.internalServerError('Failed to create store category');
+    }
+  }
+
+  async updateStoreCategory(data: UpdateStoreCategoryRequest): Promise<Id> {
+    this.logger.debug(`Updating store category with data: ${JSON.stringify(data)}`);
+    try {
+      await this.storeCategoryRepository.updateStoreCategory(data);
+      return { id: data.id };
+    } catch (error) {
+      this.logger.error(`Error updating store category: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to update store category');
+    }
+  }
+
+  async deleteStoreCategory(id: string): Promise<StatusResponse> {
+    this.logger.debug(`Deleting store category with id: ${id}`);
+    try {
+      const result = await this.storeCategoryRepository.deleteStoreCategory(id);
+      if (result[0].affectedRows === 0) {
+        this.logger.warn(`Store category with id: ${id} not found`);
+        throw AppError.notFound('Store category not found');
+      }
+      this.logger.debug(`Store category with id: ${id} deleted successfully`);
+      return { success: true, message: 'Store category deleted successfully' };
+    } catch (error) {
+      this.logger.error(`Error deleting store category: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to delete store category');
+    }
+  }
+
+  async changeStoreCategoryPosition(data: ChangeStoreCategoryPositionRequest): Promise<StoreCategory> {
+    this.logger.debug(`Changing position of store category with data: ${JSON.stringify(data)}`);
+    try {
+      const categoryList = await this.storeCategoryRepository.findStoreCategoryList();
+      const categoryToUpdate = categoryList.find((category) => category.id === data.id);
+      if (!categoryToUpdate) {
+        this.logger.warn(`Store category with id: ${data.id} not found`);
+        throw AppError.notFound('Store category not found');
+      }
+      const positionUpdates = this.calculatePositionUpdates(categoryList, categoryToUpdate, data.sortOrder);
+      await this.storeCategoryRepository.changeStoreCategoryPosition(data.id, positionUpdates);
+      const updatedCategory = await this.storeCategoryRepository.findStoreCategoryById(data.id);
+      if (!updatedCategory) {
+        this.logger.warn(`Store category with id: ${data.id} not found after update`);
+        throw AppError.notFound('Store category not found after update');
+      }
+      this.logger.debug(`Store category with id: ${data.id} position changed successfully`);
+      return {
+        id: updatedCategory.id,
+        slug: updatedCategory.slug,
+        isAvailable: updatedCategory.isAvailable,
+        sortOrder: updatedCategory.sortOrder,
+      };
+    } catch (error) {
+      this.logger.error(`Error changing position of store category: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to change position of store category');
+    }
+  }
+
+  async createOrUpdateStoreCategoryTranslation(data: StoreCategoryTranslationRequest): Promise<Id> {
+    this.logger.debug(`Creating or updating store category translation with data: ${JSON.stringify(data)}`);
+    try {
+      await this.storeCategoryRepository.createOrUpdateStoreCategoryTranslation({
+        ...data,
+        language: data.language as LanguageEnum,
+      });
+      return { id: data.categoryId };
+    } catch (error) {
+      this.logger.error(
+        `Error creating or updating store category translation: ${error instanceof Error ? error.message : error}`,
+      );
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to create or update store category translation');
+    }
+  }
+
+  async deleteStoreCategoryTranslation(id: string): Promise<StatusResponse> {
+    this.logger.debug(`Deleting store category translation with id: ${id}`);
+    try {
+      const result = await this.storeCategoryRepository.deleteStoreCategoryTranslation(id);
+      if (result[0].affectedRows === 0) {
+        this.logger.warn(`Store category translation with id: ${id} not found`);
+        throw AppError.notFound('Store category translation not found');
+      }
+      this.logger.debug(`Store category translation with id: ${id} delete result: ${JSON.stringify(result)}`);
+      this.logger.debug(`Store category translation with id: ${id} deleted successfully`);
+      return { success: true, message: 'Store category translation deleted successfully' };
+    } catch (error) {
+      this.logger.error(`Error deleting store category translation: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof AppError) throw error;
+      throw AppError.internalServerError('Failed to delete store category translation');
+    }
+  }
+
+  // Business logic: calculate which categories need position updates
+  private calculatePositionUpdates(
+    categories: StoreCategory[],
+    categoryToUpdate: StoreCategory,
+    newPosition: number,
+  ): Array<{ id: string; position: number }> {
+    return categories
+      .map((category) => {
+        if (category.id === categoryToUpdate.id) {
+          return { id: category.id, position: newPosition };
+        }
+        if (categoryToUpdate.sortOrder < newPosition) {
+          // Moving down
+          if (category.sortOrder > categoryToUpdate.sortOrder && category.sortOrder <= newPosition) {
+            return { id: category.id, position: category.sortOrder - 1 };
+          }
+        } else if (categoryToUpdate.sortOrder > newPosition) {
+          // Moving up
+          if (category.sortOrder < categoryToUpdate.sortOrder && category.sortOrder >= newPosition) {
+            return { id: category.id, position: category.sortOrder + 1 };
+          }
+        }
+        return { id: category.id, position: category.sortOrder };
+      })
+      .filter((update) => {
+        const original = categories.find((c) => c.id === update.id);
+        return original && original.sortOrder !== update.position;
+      });
   }
 }

@@ -3,7 +3,7 @@ import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
 import { itemAttribute } from './item-attribute.schema';
-import { languageEnum } from './language.enum';
+import { languageEnum } from '../language.enum';
 
 export const itemAttributeTranslation = mysqlTable(
   'item_attribute_translation',

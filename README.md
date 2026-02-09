@@ -1,98 +1,184 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Store Microservice
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat&logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
+![gRPC](https://img.shields.io/badge/gRPC-244C5A?style=flat&logo=google&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)
+![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=flat&logo=drizzle&logoColor=black)
+![Jest](https://img.shields.io/badge/Jest-C21325?style=flat&logo=jest&logoColor=white)
+![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=flat&logo=eslint&logoColor=white)
+![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=flat&logo=prettier&logoColor=black)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A gRPC-based microservice for managing store categories, items, attributes, prices, and images in the CoffeeDoor microservices ecosystem. Supports multi-language translations (EN, UK, RU, DE, ES, FR).
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Category Management** - Create, update, delete, and reorder store categories
+- **Multi-Language Support** - Translations for 6 languages (English, Ukrainian, Russian, German, Spanish, French)
+- **Smart Positioning** - Automatic sort order adjustment when reordering categories
+- **Translation CRUD** - Upsert and delete translations for categories independently
+- **Health Checks** - Liveness and readiness endpoints with dependency status
 
-## Project setup
+## Technology Stack
 
-```bash
-$ npm install
+- **Framework:** NestJS v11
+- **Runtime:** Node.js 22
+- **Database:** MySQL 8.0
+- **ORM:** Drizzle ORM
+- **Communication:** gRPC
+- **Language:** TypeScript
+
+## gRPC Endpoints
+
+### StoreCategoryService
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| `GetStoreCategoryById` | `Id { id }` | `StoreCategoryWithTranslation` | Fetch category with all translations |
+| `GetStoreCategoriesByLanguage` | `Language { language }` | `StoreCategoryList` | Get all categories by language |
+| `CreateStoreCategory` | `CreateStoreCategoryRequest` | `Id` | Create a new category |
+| `UpdateStoreCategory` | `UpdateStoreCategoryRequest` | `Id` | Update category (slug/availability) |
+| `DeleteStoreCategory` | `Id { id }` | `StatusResponse` | Delete category with cascading |
+| `ChangeStoreCategoryPosition` | `ChangeStoreCategoryPositionRequest` | `StoreCategory` | Reorder categories |
+| `UpsertStoreCategoryTranslation` | `StoreCategoryTranslationRequest` | `Id` | Create or update translation |
+| `DeleteStoreCategoryTranslation` | `Id { id }` | `StatusResponse` | Delete a translation |
+
+### HealthCheckService
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| `CheckAppHealth` | `Empty` | `HealthCheckResponse` | Service liveness check |
+| `CheckAppConnections` | `Empty` | `ReadinessResponse` | Dependency readiness check |
+
+## Database Schema
+
+```
+category ──┬── category_translation (1:N)
+            ├── item ──┬── item_translation (1:N)
+            │          ├── item_price (1:N)
+            │          ├── image (1:N)
+            │          └── item_attribute ── item_attribute_translation (1:N)
+            └── attribute ── attribute_translation (1:N)
 ```
 
-## Compile and run the project
+All tables share base columns: `id` (UUID), `createdAt`, `updatedAt`.
 
-```bash
-# development
-$ npm run start
+## Environment Variables
 
-# watch mode
-$ npm run start:dev
+Create a `.env.local` file based on `.env.example`:
 
-# production mode
-$ npm run start:prod
+```env
+# Deployment Environment
+NODE_ENV=development
+
+# gRPC Connection
+TRANSPORT_URL=0.0.0.0:5004
+HTTP_PORT=9104
+
+# Database
+DATABASE_URL=mysql://user:password@localhost:3306/store_db
 ```
 
-## Run tests
+## Project Setup
 
 ```bash
-# unit tests
-$ npm run test
+# Install dependencies
+npm install
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Generate gRPC types from proto files
+npm run proto:generate
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Running the Service
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Development mode
+npm run start:dev
+
+# Production mode
+npm run start:prod
+
+# Debug mode
+npm run start:debug
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Docker Deployment
 
-## Resources
+```bash
+# Start MySQL database
+docker-compose up -d
 
-Check out a few resources that may come in handy when working with NestJS:
+# Run the service
+npm run start:dev
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The service will be available at:
+- **gRPC:** `0.0.0.0:5004`
+- **HTTP:** `0.0.0.0:9104`
+- **MySQL:** `localhost:3306`
 
-## Support
+## Project Structure
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```
+src/
+├── app.module.ts                   # Root module
+├── main.ts                         # Application entry point
+├── health-check/                   # Health check module
+│   ├── health-check.controller.ts
+│   ├── health-check.service.ts
+│   └── health-check.module.ts
+├── store-category/                 # Core business logic
+│   ├── store-category.controller.ts
+│   ├── store-category.service.ts
+│   ├── store.category.repository.ts
+│   └── store-category.module.ts
+├── database/                       # Database layer
+│   ├── database.module.ts
+│   ├── drizzle.config.ts
+│   ├── language.enum.ts
+│   └── schema/                     # Drizzle ORM schemas
+│       ├── category.schema.ts
+│       ├── category-translation.schema.ts
+│       ├── item.schema.ts
+│       ├── item-translation.schema.ts
+│       ├── item-price.schema.ts
+│       ├── image.schema.ts
+│       ├── attribute.schema.ts
+│       ├── attribute-translation.schema.ts
+│       ├── item-attribute.schema.ts
+│       └── item-attribute-translation.schema.ts
+├── utils/                          # Utilities
+│   ├── env.dto.ts
+│   ├── errors/
+│   ├── filters/
+│   └── validators/
+└── generated-types/                # gRPC proto-generated types
+```
 
-## Stay in touch
+## Testing
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+```
+
+## Proto Files
+
+The service uses protocol buffers for gRPC communication:
+- `proto/store-category.proto` - StoreCategoryService interface
+- `proto/health-check.proto` - HealthCheckService interface
+
+## Network
+
+This service connects to the `coffeedoor-network` Docker network for inter-service communication with other microservices in the ecosystem.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is proprietary software.

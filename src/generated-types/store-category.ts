@@ -83,6 +83,14 @@ export interface ChangeStoreCategoryPositionRequest {
   sortOrder: number;
 }
 
+/** Message for creating or updating a store category translation */
+export interface StoreCategoryTranslationRequest {
+  categoryId: string;
+  title: string;
+  description?: string | null | undefined;
+  language: string;
+}
+
 export const STORE_CATEGORY_V1_PACKAGE_NAME = "store_category.v1";
 
 /** StoreCategoryService defines the gRPC service for managing store categories. */
@@ -98,19 +106,27 @@ export interface StoreCategoryServiceClient {
 
   /** rpc to create a new store category */
 
-  createStoreCategory(request: CreateStoreCategoryRequest): Observable<StoreCategory>;
+  createStoreCategory(request: CreateStoreCategoryRequest): Observable<Id>;
 
   /** rpc to update an existing store category */
 
-  updateStoreCategory(request: UpdateStoreCategoryRequest): Observable<StoreCategory>;
+  updateStoreCategory(request: UpdateStoreCategoryRequest): Observable<Id>;
+
+  /** rpc to delete a store category by its ID */
+
+  deleteStoreCategory(request: Id): Observable<StatusResponse>;
 
   /** rpc to change the position of a store category */
 
   changeStoreCategoryPosition(request: ChangeStoreCategoryPositionRequest): Observable<StoreCategory>;
 
-  /** rpc to delete a store category by its ID */
+  /** rpc to create or update a store category translation */
 
-  deleteStoreCategory(request: Id): Observable<StatusResponse>;
+  upsertStoreCategoryTranslation(request: StoreCategoryTranslationRequest): Observable<Id>;
+
+  /** rpc to delete a store category translation by its ID */
+
+  deleteStoreCategoryTranslation(request: Id): Observable<StatusResponse>;
 }
 
 /** StoreCategoryService defines the gRPC service for managing store categories. */
@@ -130,15 +146,15 @@ export interface StoreCategoryServiceController {
 
   /** rpc to create a new store category */
 
-  createStoreCategory(
-    request: CreateStoreCategoryRequest,
-  ): Promise<StoreCategory> | Observable<StoreCategory> | StoreCategory;
+  createStoreCategory(request: CreateStoreCategoryRequest): Promise<Id> | Observable<Id> | Id;
 
   /** rpc to update an existing store category */
 
-  updateStoreCategory(
-    request: UpdateStoreCategoryRequest,
-  ): Promise<StoreCategory> | Observable<StoreCategory> | StoreCategory;
+  updateStoreCategory(request: UpdateStoreCategoryRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to delete a store category by its ID */
+
+  deleteStoreCategory(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
 
   /** rpc to change the position of a store category */
 
@@ -146,9 +162,13 @@ export interface StoreCategoryServiceController {
     request: ChangeStoreCategoryPositionRequest,
   ): Promise<StoreCategory> | Observable<StoreCategory> | StoreCategory;
 
-  /** rpc to delete a store category by its ID */
+  /** rpc to create or update a store category translation */
 
-  deleteStoreCategory(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+  upsertStoreCategoryTranslation(request: StoreCategoryTranslationRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to delete a store category translation by its ID */
+
+  deleteStoreCategoryTranslation(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
 }
 
 export function StoreCategoryServiceControllerMethods() {
@@ -158,8 +178,10 @@ export function StoreCategoryServiceControllerMethods() {
       "getStoreCategoryById",
       "createStoreCategory",
       "updateStoreCategory",
-      "changeStoreCategoryPosition",
       "deleteStoreCategory",
+      "changeStoreCategoryPosition",
+      "upsertStoreCategoryTranslation",
+      "deleteStoreCategoryTranslation",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

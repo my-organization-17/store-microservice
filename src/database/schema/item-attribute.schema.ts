@@ -38,3 +38,6 @@ export const itemAttributeRelations = relations(itemAttribute, ({ one, many }) =
   }),
   translations: many(itemAttributeTranslation),
 }));
+
+export type ItemAttribute = typeof itemAttribute.$inferSelect;
+export type NewItemAttribute = typeof itemAttribute.$inferInsert;

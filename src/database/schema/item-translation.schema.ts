@@ -26,3 +26,6 @@ export const itemTranslationRelations = relations(itemTranslation, ({ one }) => 
     references: [item.id],
   }),
 }));
+
+export type ItemTranslation = typeof itemTranslation.$inferSelect;
+export type NewItemTranslation = typeof itemTranslation.$inferInsert;

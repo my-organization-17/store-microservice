@@ -2,11 +2,11 @@ import { boolean, date, int, mysqlTable, varchar } from 'drizzle-orm/mysql-core'
 import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
-import { category } from './category.schema';
-import { image } from './image.schema';
-import { itemPrice } from './item-price.schema';
-import { itemAttribute } from './item-attribute.schema';
-import { itemTranslation } from './item-translation.schema';
+import { Category, category } from './category.schema';
+import { Image, image } from './image.schema';
+import { ItemPrice, itemPrice } from './item-price.schema';
+import { ItemAttribute, itemAttribute } from './item-attribute.schema';
+import { ItemTranslation, itemTranslation } from './item-translation.schema';
 
 export const item = mysqlTable('item', {
   ...baseColumns,
@@ -30,3 +30,13 @@ export const itemRelations = relations(item, ({ one, many }) => ({
   prices: many(itemPrice),
   attributes: many(itemAttribute),
 }));
+
+export type Item = typeof item.$inferSelect;
+export type NewItem = typeof item.$inferInsert;
+export type ItemWithRelations = Item & {
+  category: Category;
+  translations: ItemTranslation[];
+  images: Image[];
+  prices: ItemPrice[];
+  attributes: ItemAttribute[];
+};

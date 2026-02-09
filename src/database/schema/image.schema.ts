@@ -20,3 +20,6 @@ export const imageRelations = relations(image, ({ one }) => ({
     references: [item.id],
   }),
 }));
+
+export type Image = typeof image.$inferSelect;
+export type NewImage = typeof image.$inferInsert;

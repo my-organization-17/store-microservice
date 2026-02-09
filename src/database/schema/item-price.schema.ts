@@ -30,3 +30,6 @@ export const itemPriceRelations = relations(itemPrice, ({ one }) => ({
     references: [item.id],
   }),
 }));
+
+export type ItemPrice = typeof itemPrice.$inferSelect;
+export type NewItemPrice = typeof itemPrice.$inferInsert;

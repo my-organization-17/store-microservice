@@ -23,3 +23,6 @@ export const attributeRelations = relations(attribute, ({ one, many }) => ({
   translations: many(attributeTranslation),
   itemAttributes: many(itemAttribute),
 }));
+
+export type Attribute = typeof attribute.$inferSelect;
+export type NewAttribute = typeof attribute.$inferInsert;

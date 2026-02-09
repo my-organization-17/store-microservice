@@ -24,3 +24,6 @@ export const attributeTranslationRelations = relations(attributeTranslation, ({ 
     references: [attribute.id],
   }),
 }));
+
+export type AttributeTranslation = typeof attributeTranslation.$inferSelect;
+export type NewAttributeTranslation = typeof attributeTranslation.$inferInsert;

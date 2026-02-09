@@ -14,6 +14,7 @@ export class StoreCategoryRepository {
     private readonly drizzleDb: ReturnType<typeof drizzle<typeof schema>>,
   ) {}
 
+  // find store category by its id
   async findStoreCategoryById(id: string): Promise<schema.Category | null> {
     this.logger.debug(`Finding store category with id: ${id}`);
     const result = await this.drizzleDb.query.category.findFirst({
@@ -22,11 +23,13 @@ export class StoreCategoryRepository {
     return result ?? null;
   }
 
+  // find all store categories
   async findStoreCategoryList(): Promise<schema.Category[]> {
     this.logger.debug(`Finding all store categories`);
     return await this.drizzleDb.query.category.findMany();
   }
 
+  // find store category by its id with translations
   async findStoreCategoryByIdWithTranslation(
     id: string,
   ): Promise<(schema.Category & { translations: schema.CategoryTranslation[] }) | null> {
@@ -40,6 +43,7 @@ export class StoreCategoryRepository {
     return result ?? null;
   }
 
+  // find all store categories with translations for a specific language
   async findStoreCategoryListWithTranslation(
     language: LanguageEnum,
   ): Promise<(schema.Category & { translations: schema.CategoryTranslation[] })[]> {
@@ -53,6 +57,7 @@ export class StoreCategoryRepository {
     });
   }
 
+  // find default translation for store category by its id
   async getDefaultTranslationForCategory(categoryId: string): Promise<schema.CategoryTranslation | null> {
     this.logger.debug(`Getting default translation for store category with id: ${categoryId}`);
     const result = await this.drizzleDb.query.categoryTranslation.findFirst({
@@ -70,6 +75,7 @@ export class StoreCategoryRepository {
     return await this.drizzleDb.insert(schema.category).values(data).$returningId();
   }
 
+  // update store category by its id, if the category does not exist, it will be created
   async updateStoreCategory(data: UpdateStoreCategoryRequest): Promise<MySqlRawQueryResult> {
     this.logger.debug(`Updating store category with data: ${JSON.stringify(data)}`);
     return await this.drizzleDb
@@ -87,11 +93,13 @@ export class StoreCategoryRepository {
       });
   }
 
+  // delete store category by its id
   async deleteStoreCategory(id: string): Promise<MySqlRawQueryResult> {
     this.logger.debug(`Deleting store category with id: ${id}`);
     return await this.drizzleDb.delete(schema.category).where(eq(schema.category.id, id));
   }
 
+  // change position of store category by its id, the sortOrderUpdates is an array of objects with id and position, the position is the new sort order for the category with the given id
   async changeStoreCategoryPosition(
     id: string,
     sortOrderUpdates: Array<{ id: string; position: number }>,
@@ -106,6 +114,7 @@ export class StoreCategoryRepository {
     });
   }
 
+  // create or update store category translation, if the translation does not exist, it will be created, if it exists, it will be updated
   async createOrUpdateStoreCategoryTranslation(data: {
     categoryId: string;
     title: string;
@@ -129,6 +138,7 @@ export class StoreCategoryRepository {
       });
   }
 
+  // delete store category translation by its id
   async deleteStoreCategoryTranslation(id: string): Promise<MySqlRawQueryResult> {
     this.logger.debug(`Deleting store category translation with id: ${id}`);
     return await this.drizzleDb.delete(schema.categoryTranslation).where(eq(schema.categoryTranslation.id, id));

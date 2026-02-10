@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { AppError } from 'src/utils/errors/app-error';
-import { StoreCategoryRepository } from './store.category.repository';
+import { StoreCategoryRepository } from './store-category.repository';
 
 import type {
   ChangeStoreCategoryPositionRequest,

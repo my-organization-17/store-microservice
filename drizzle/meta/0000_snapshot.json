@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "85f313a2-ac85-4bbb-bdb6-cf3a25ab0644",
+  "id": "6299b0d1-6a86-4684-8adb-3442611abce7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "attribute_translation": {
@@ -607,6 +607,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "item_attribute_id": {
+          "name": "item_attribute_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "price_type": {
           "name": "price_type",
           "type": "varchar(50)",
@@ -640,11 +647,12 @@
         }
       },
       "indexes": {
-        "type_item_unique": {
-          "name": "type_item_unique",
+        "type_item_attr_unique": {
+          "name": "type_item_attr_unique",
           "columns": [
             "item_id",
-            "price_type"
+            "price_type",
+            "item_attribute_id"
           ],
           "isUnique": true
         }
@@ -656,6 +664,19 @@
           "tableTo": "item",
           "columnsFrom": [
             "item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "item_price_item_attr_id_fk": {
+          "name": "item_price_item_attr_id_fk",
+          "tableFrom": "item_price",
+          "tableTo": "item_attribute",
+          "columnsFrom": [
+            "item_attribute_id"
           ],
           "columnsTo": [
             "id"

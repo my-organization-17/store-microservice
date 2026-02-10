@@ -1,8 +1,9 @@
-import { decimal, int, mysqlTable, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
+import { decimal, foreignKey, int, mysqlTable, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
 import { item } from './item.schema';
+import { itemAttribute } from './item-attribute.schema';
 
 export const itemPrice = mysqlTable(
   'item_price',
@@ -11,6 +12,7 @@ export const itemPrice = mysqlTable(
     itemId: varchar('item_id', { length: 36 })
       .notNull()
       .references(() => item.id, { onDelete: 'cascade' }),
+    itemAttributeId: varchar('item_attribute_id', { length: 36 }),
     priceType: varchar('price_type', {
       length: 50,
       enum: ['regular', 'discount', 'wholesale'],
@@ -21,13 +23,24 @@ export const itemPrice = mysqlTable(
     currency: varchar({ length: 10 }).notNull().default('UAH'),
     sortOrder: int('sort_order').default(0).notNull(),
   },
-  (table) => [uniqueIndex('type_item_unique').on(table.itemId, table.priceType)],
+  (table) => [
+    uniqueIndex('type_item_attr_unique').on(table.itemId, table.priceType, table.itemAttributeId),
+    foreignKey({
+      name: 'item_price_item_attr_id_fk',
+      columns: [table.itemAttributeId],
+      foreignColumns: [itemAttribute.id],
+    }).onDelete('cascade'),
+  ],
 );
 
 export const itemPriceRelations = relations(itemPrice, ({ one }) => ({
   item: one(item, {
     fields: [itemPrice.itemId],
     references: [item.id],
+  }),
+  itemAttribute: one(itemAttribute, {
+    fields: [itemPrice.itemAttributeId],
+    references: [itemAttribute.id],
   }),
 }));
 

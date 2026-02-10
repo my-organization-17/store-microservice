@@ -33,10 +33,14 @@ export const itemRelations = relations(item, ({ one, many }) => ({
 
 export type Item = typeof item.$inferSelect;
 export type NewItem = typeof item.$inferInsert;
+export type ItemAttributeWithPrices = ItemAttribute & {
+  prices: ItemPrice[];
+};
+
 export type ItemWithRelations = Item & {
   category: Category;
   translations: ItemTranslation[];
   images: Image[];
   prices: ItemPrice[];
-  attributes: ItemAttribute[];
+  attributes: ItemAttributeWithPrices[];
 };

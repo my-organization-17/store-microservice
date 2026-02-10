@@ -6,6 +6,7 @@ import { EnvironmentVariables } from './utils/env.dto';
 import { HealthCheckModule } from './health-check/health-check.module';
 import { DatabaseModule } from './database/database.module';
 import { StoreCategoryModule } from './store-category/store-category.module';
+import { StoreItemModule } from './store-item/store-item.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { StoreCategoryModule } from './store-category/store-category.module';
     HealthCheckModule,
     DatabaseModule,
     StoreCategoryModule,
+    StoreItemModule,
   ],
   controllers: [],
   providers: [],

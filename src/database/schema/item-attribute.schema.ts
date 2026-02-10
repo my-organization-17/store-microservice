@@ -5,6 +5,7 @@ import { baseColumns } from './base-columns';
 import { item } from './item.schema';
 import { attribute } from './attribute.schema';
 import { itemAttributeTranslation } from './item-attribute-translation.schema';
+import { itemPrice } from './item-price.schema';
 
 export const itemAttribute = mysqlTable(
   'item_attribute',
@@ -37,6 +38,7 @@ export const itemAttributeRelations = relations(itemAttribute, ({ one, many }) =
     references: [attribute.id],
   }),
   translations: many(itemAttributeTranslation),
+  prices: many(itemPrice),
 }));
 
 export type ItemAttribute = typeof itemAttribute.$inferSelect;

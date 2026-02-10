@@ -1,4 +1,4 @@
-import { decimal, foreignKey, int, mysqlTable, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
+import { decimal, foreignKey, mysqlTable, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
@@ -21,7 +21,6 @@ export const itemPrice = mysqlTable(
       .default('regular'),
     value: decimal({ precision: 10, scale: 2 }).notNull(),
     currency: varchar({ length: 10 }).notNull().default('UAH'),
-    sortOrder: int('sort_order').default(0).notNull(),
   },
   (table) => [
     uniqueIndex('type_item_attr_unique').on(table.itemId, table.priceType, table.itemAttributeId),

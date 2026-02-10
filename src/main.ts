@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import { GrpcExceptionFilter } from './utils/filters/grpc-exception.filter';
 import { HEALTH_CHECK_V1_PACKAGE_NAME } from './generated-types/health-check';
 import { STORE_CATEGORY_V1_PACKAGE_NAME } from './generated-types/store-category';
+import { STORE_ITEM_V1_PACKAGE_NAME } from './generated-types/store-item';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -24,8 +25,8 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [HEALTH_CHECK_V1_PACKAGE_NAME, STORE_CATEGORY_V1_PACKAGE_NAME],
-      protoPath: ['proto/health-check.proto', 'proto/store-category.proto'],
+      package: [HEALTH_CHECK_V1_PACKAGE_NAME, STORE_CATEGORY_V1_PACKAGE_NAME, STORE_ITEM_V1_PACKAGE_NAME],
+      protoPath: ['proto/health-check.proto', 'proto/store-category.proto', 'proto/store-item.proto'],
       url,
     },
   });

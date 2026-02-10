@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package store_item.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// StoreItemService defines the gRPC service for managing store items.
+service StoreItemService {
+  // rpc to get store items by category ID with options for a specific language
+  rpc GetStoreItemsByCategoryIdWithOption(GetStoreItemsByCategoryIdWithOptionRequest) returns (StoreItemListWithOption) {}
+}
+
+// declaration of GetStoreItemsByCategoryIdWithOptionRequest message
+message GetStoreItemsByCategoryIdWithOptionRequest {
+  string category_id = 1;
+  string language = 2;
+}
+
+// Message representing a list of store items with options
+message StoreItemListWithOption {
+  repeated StoreItemWithOption data = 1;
+}
+
+// Message representing a store item with options
+message StoreItemWithOption {
+  string id = 1;
+  optional string brand = 2;
+  string slug = 3;
+  bool is_available = 4;
+  int32 sort_order = 5;
+  optional google.protobuf.Timestamp expected_date = 6;
+  string category_id = 7;
+  repeated ItemPrice prices = 8;
+  repeated ItemTranslation translations = 9;
+  repeated ItemImage images = 10;
+}
+
+// Message representing a store item option
+message ItemPrice {
+  string id = 1;
+  string item_id = 2;
+  optional string item_attribute_id = 3;
+  string price_type = 4;
+  string value = 5;
+  string currency = 6;
+}
+
+// Message representing a translation for a store item
+message ItemTranslation {
+  string id = 1;
+  string item_id = 2;
+  string language = 3;
+  string title = 4;
+  optional string description = 5;
+  optional string detailed_description = 6;
+}
+
+// Message representing an image for a store item
+message ItemImage {
+  string id = 1;
+  string item_id = 2;
+  string url = 3;
+  optional string alt = 4;
+  int32 sort_order = 5;
+}
+
+// Command to generate TypeScript code with NestJS options, using null for optional fields and Date for timestamps
+// protoc -I ./proto ./proto/store-item.proto --ts_proto_out=./src/generated-types --ts_proto_opt=nestJs=true --ts_proto_opt=useNullAsOptional=true --ts_proto_opt=useDate=true

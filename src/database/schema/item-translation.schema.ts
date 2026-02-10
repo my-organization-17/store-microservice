@@ -1,9 +1,9 @@
 import { mysqlTable, text, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
+import { languageEnum } from '../language.enum';
 import { baseColumns } from './base-columns';
 import { item } from './item.schema';
-import { languageEnum } from '../language.enum';
 
 export const itemTranslation = mysqlTable(
   'item_translation',

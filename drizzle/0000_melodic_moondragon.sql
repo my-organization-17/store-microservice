@@ -81,7 +81,6 @@ CREATE TABLE `item_price` (
 	`price_type` varchar(50) NOT NULL DEFAULT 'regular',
 	`value` decimal(10,2) NOT NULL,
 	`currency` varchar(10) NOT NULL DEFAULT 'UAH',
-	`sort_order` int NOT NULL DEFAULT 0,
 	CONSTRAINT `item_price_id` PRIMARY KEY(`id`),
 	CONSTRAINT `type_item_attr_unique` UNIQUE(`item_id`,`price_type`,`item_attribute_id`)
 );

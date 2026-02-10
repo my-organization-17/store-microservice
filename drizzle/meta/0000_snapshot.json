@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "6299b0d1-6a86-4684-8adb-3442611abce7",
+  "id": "2ca512a0-8548-4d37-9ef6-492151f7022a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "attribute_translation": {
@@ -636,14 +636,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'UAH'"
-        },
-        "sort_order": {
-          "name": "sort_order",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
         }
       },
       "indexes": {

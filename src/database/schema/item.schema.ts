@@ -2,7 +2,7 @@ import { boolean, date, int, mysqlTable, varchar } from 'drizzle-orm/mysql-core'
 import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
-import { Category, category } from './category.schema';
+import { category } from './category.schema';
 import { Image, image } from './image.schema';
 import { ItemPrice, itemPrice } from './item-price.schema';
 import { ItemAttribute, itemAttribute } from './item-attribute.schema';
@@ -13,7 +13,7 @@ export const item = mysqlTable('item', {
   slug: varchar({ length: 255 }).notNull(),
   brand: varchar({ length: 255 }),
   isAvailable: boolean('is_available').default(true).notNull(),
-  expectedDate: date('expected_date'),
+  expectedDate: date('expected_date', { mode: 'date' }),
   sortOrder: int('sort_order').default(0).notNull(),
   categoryId: varchar('category_id', { length: 36 })
     .notNull()
@@ -38,9 +38,8 @@ export type ItemAttributeWithPrices = ItemAttribute & {
 };
 
 export type ItemWithRelations = Item & {
-  category: Category;
   translations: ItemTranslation[];
-  images: Image[];
   prices: ItemPrice[];
-  attributes: ItemAttributeWithPrices[];
+  images: Image[];
+  attributes?: ItemAttributeWithPrices[];
 };

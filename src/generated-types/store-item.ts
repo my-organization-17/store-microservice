@@ -34,6 +34,7 @@ export interface StoreItemWithOption {
   prices: ItemPrice[];
   translations: ItemTranslation[];
   images: ItemImage[];
+  attributes: ItemAttribute[];
 }
 
 /** Message representing a store item option */
@@ -63,6 +64,41 @@ export interface ItemImage {
   url: string;
   alt?: string | null | undefined;
   sortOrder: number;
+}
+
+/** Message representing an item attribute (junction between item and attribute definition) */
+export interface ItemAttribute {
+  id: string;
+  itemId: string;
+  attributeId: string;
+  attribute: Attribute | null;
+  translations: ItemAttributeTranslation[];
+  prices: ItemPrice[];
+}
+
+/** Message representing an attribute definition */
+export interface Attribute {
+  id: string;
+  categoryId: string;
+  slug: string;
+  sortOrder: number;
+  translations: AttributeTranslation[];
+}
+
+/** Message representing a translation for an attribute name */
+export interface AttributeTranslation {
+  id: string;
+  attributeId: string;
+  language: string;
+  name: string;
+}
+
+/** Message representing a translation for an item attribute value */
+export interface ItemAttributeTranslation {
+  id: string;
+  itemAttributeId: string;
+  language: string;
+  value: string;
 }
 
 export const STORE_ITEM_V1_PACKAGE_NAME = "store_item.v1";

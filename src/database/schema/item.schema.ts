@@ -6,7 +6,10 @@ import { category } from './category.schema';
 import { Image, image } from './image.schema';
 import { ItemPrice, itemPrice } from './item-price.schema';
 import { ItemAttribute, itemAttribute } from './item-attribute.schema';
+import { ItemAttributeTranslation } from './item-attribute-translation.schema';
 import { ItemTranslation, itemTranslation } from './item-translation.schema';
+import { Attribute } from './attribute.schema';
+import { AttributeTranslation } from './attribute-translation.schema';
 
 export const item = mysqlTable('item', {
   ...baseColumns,
@@ -33,13 +36,19 @@ export const itemRelations = relations(item, ({ one, many }) => ({
 
 export type Item = typeof item.$inferSelect;
 export type NewItem = typeof item.$inferInsert;
+export type AttributeWithTranslations = Attribute & {
+  translations: AttributeTranslation[];
+};
+
 export type ItemAttributeWithPrices = ItemAttribute & {
   prices: ItemPrice[];
+  translations: ItemAttributeTranslation[];
+  attribute: AttributeWithTranslations;
 };
 
 export type ItemWithRelations = Item & {
   translations: ItemTranslation[];
   prices: ItemPrice[];
   images: Image[];
-  attributes?: ItemAttributeWithPrices[];
+  attributes: ItemAttributeWithPrices[];
 };

@@ -30,8 +30,24 @@ export class StoreItemRepository {
         },
         prices: true,
         images: true,
+        attributes: {
+          with: {
+            prices: true,
+            translations: {
+              where: eq(schema.itemAttributeTranslation.language, language),
+            },
+            attribute: {
+              with: {
+                translations: {
+                  where: eq(schema.attributeTranslation.language, language),
+                },
+              },
+            },
+          },
+        },
       },
     });
+
     return items;
   }
 }

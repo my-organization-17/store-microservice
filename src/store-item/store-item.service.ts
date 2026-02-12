@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-// import * as schema from 'src/database/schema';
 import { AppError } from 'src/utils/errors/app-error';
 import { StoreItemRepository } from './store-item.repository';
 import type { LanguageEnum } from 'src/database/language.enum';
-import { StoreItemListWithOption } from 'src/generated-types/store-item';
+import type { StoreItemListWithOption } from 'src/generated-types/store-item';
+import { mapItemsToResponse } from './store-item.mapper';
 
 @Injectable()
 export class StoreItemService {
@@ -25,7 +25,7 @@ export class StoreItemService {
         this.logger.warn(`No store items found for category id: ${categoryId} and language: ${language}`);
         return { data: [] };
       }
-      return { data: items };
+      return { data: mapItemsToResponse(items) };
     } catch (error) {
       this.logger.error(`Error fetching store items: ${error instanceof Error ? error.message : error}`);
       throw AppError.internalServerError('Failed to retrieve store items');

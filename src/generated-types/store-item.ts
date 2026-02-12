@@ -22,7 +22,7 @@ export interface StoreItemListWithOption {
   data: StoreItemWithOption[];
 }
 
-/** Message representing a store item with options */
+/** Message representing a store item with flattened translations and variants */
 export interface StoreItemWithOption {
   id: string;
   brand?: string | null | undefined;
@@ -31,74 +31,44 @@ export interface StoreItemWithOption {
   sortOrder: number;
   expectedDate?: Date | null | undefined;
   categoryId: string;
-  prices: ItemPrice[];
-  translations: ItemTranslation[];
+  title: string;
+  description?: string | null | undefined;
+  detailedDescription?: string | null | undefined;
   images: ItemImage[];
-  attributes: ItemAttribute[];
+  variants: ItemVariant[];
+  prices: ItemBasePrice[];
+  attributes: ItemInfoAttribute[];
 }
 
-/** Message representing a store item option */
-export interface ItemPrice {
+/** Message representing an informational attribute (no price impact) */
+export interface ItemInfoAttribute {
+  name: string;
+  value: string;
+}
+
+/** Message representing a product variant (one per attribute value) */
+export interface ItemVariant {
   id: string;
-  itemId: string;
-  itemAttributeId?: string | null | undefined;
+  attributeName: string;
+  attributeValue: string;
+  regularPrice?: string | null | undefined;
+  discountPrice?: string | null | undefined;
+  currency: string;
+}
+
+/** Message representing a base price for items without variants */
+export interface ItemBasePrice {
   priceType: string;
   value: string;
   currency: string;
 }
 
-/** Message representing a translation for a store item */
-export interface ItemTranslation {
-  id: string;
-  itemId: string;
-  language: string;
-  title: string;
-  description?: string | null | undefined;
-  detailedDescription?: string | null | undefined;
-}
-
 /** Message representing an image for a store item */
 export interface ItemImage {
   id: string;
-  itemId: string;
   url: string;
   alt?: string | null | undefined;
   sortOrder: number;
-}
-
-/** Message representing an item attribute (junction between item and attribute definition) */
-export interface ItemAttribute {
-  id: string;
-  itemId: string;
-  attributeId: string;
-  attribute: Attribute | null;
-  translations: ItemAttributeTranslation[];
-  prices: ItemPrice[];
-}
-
-/** Message representing an attribute definition */
-export interface Attribute {
-  id: string;
-  categoryId: string;
-  slug: string;
-  sortOrder: number;
-  translations: AttributeTranslation[];
-}
-
-/** Message representing a translation for an attribute name */
-export interface AttributeTranslation {
-  id: string;
-  attributeId: string;
-  language: string;
-  name: string;
-}
-
-/** Message representing a translation for an item attribute value */
-export interface ItemAttributeTranslation {
-  id: string;
-  itemAttributeId: string;
-  language: string;
-  value: string;
 }
 
 export const STORE_ITEM_V1_PACKAGE_NAME = "store_item.v1";

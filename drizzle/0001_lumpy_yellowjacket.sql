@@ -1,0 +1,2 @@
+ALTER TABLE `attribute` ADD CONSTRAINT `attribute_category_slug_unique` UNIQUE(`category_id`,`slug`);--> statement-breakpoint
+ALTER TABLE `item` ADD CONSTRAINT `item_category_slug_unique` UNIQUE(`category_id`,`slug`);

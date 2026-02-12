@@ -14,7 +14,9 @@ export function mapItemsToResponse(items: ItemWithRelations[]): StoreItemWithOpt
 export function mapItem(item: ItemWithRelations): StoreItemWithOption {
   const translation = item.translations[0];
   const variantAttrs = item.attributes.filter((a) => a.prices.length > 0);
-  const infoAttrs = item.attributes.filter((a) => a.prices.length === 0);
+  const infoAttrs = item.attributes
+    .filter((a) => a.prices.length === 0)
+    .sort((a, b) => a.attribute.sortOrder - b.attribute.sortOrder);
 
   return {
     id: item.id,
@@ -45,6 +47,7 @@ function mapInfoAttributes(attrs: ItemWithRelations['attributes']): ItemInfoAttr
 function mapVariant(attr: ItemWithRelations['attributes'][number]): ItemVariant {
   const regularPrice = attr.prices.find((p) => p.priceType === 'regular');
   const discountPrice = attr.prices.find((p) => p.priceType === 'discount');
+  const wholesalePrice = attr.prices.find((p) => p.priceType === 'wholesale');
 
   return {
     id: attr.id,
@@ -53,7 +56,8 @@ function mapVariant(attr: ItemWithRelations['attributes'][number]): ItemVariant 
     attributeValue: attr.translations[0]?.value ?? '',
     regularPrice: regularPrice?.value ?? null,
     discountPrice: discountPrice?.value ?? null,
-    currency: regularPrice?.currency ?? discountPrice?.currency ?? 'UAH',
+    wholesalePrice: wholesalePrice?.value ?? null,
+    currency: regularPrice?.currency ?? discountPrice?.currency ?? wholesalePrice?.currency ?? 'UAH',
   };
 }
 

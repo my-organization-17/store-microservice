@@ -61,6 +61,7 @@ export interface ItemVariant {
   attributeValue: string;
   regularPrice?: string | null | undefined;
   discountPrice?: string | null | undefined;
+  wholesalePrice?: string | null | undefined;
   currency: string;
 }
 

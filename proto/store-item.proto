@@ -62,7 +62,8 @@ message ItemVariant {
   string attribute_value = 4;
   optional string regular_price = 5;
   optional string discount_price = 6;
-  string currency = 7;
+  optional string wholesale_price = 7;
+  string currency = 8;
 }
 
 // Message representing a base price for items without variants

@@ -3,6 +3,7 @@ import { GrpcMethod } from '@nestjs/microservices';
 
 import { StoreItemService } from './store-item.service';
 import {
+  type GetStoreItemByIdRequest,
   type GetStoreItemsByCategoryIdWithOptionRequest,
   STORE_ITEM_SERVICE_NAME,
   type StoreItemListWithOption,
@@ -25,5 +26,11 @@ export class StoreItemController {
       data.categoryId,
       data.language as LanguageEnum,
     );
+  }
+
+  @GrpcMethod(STORE_ITEM_SERVICE_NAME, 'GetStoreItemById')
+  async getStoreItemById(data: GetStoreItemByIdRequest) {
+    this.logger.debug(`Received request to find store item for id: ${data.itemId} with language: ${data.language}`);
+    return await this.storeItemService.getStoreItemByIdWithTranslation(data.itemId, data.language as LanguageEnum);
   }
 }

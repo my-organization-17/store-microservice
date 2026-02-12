@@ -50,4 +50,39 @@ export class StoreItemRepository {
 
     return items;
   }
+
+  // get store item by id with translations for a specific language
+  async findStoreItemsByIdWithTranslation(
+    itemId: string,
+    language: LanguageEnum,
+  ): Promise<schema.ItemWithRelations | null> {
+    this.logger.debug(`Querying store item for id: ${itemId} with translations for language: ${language}`);
+    const item = await this.drizzleDb.query.item.findFirst({
+      where: eq(schema.item.id, itemId),
+      with: {
+        translations: {
+          where: eq(schema.itemTranslation.language, language),
+        },
+        prices: true,
+        images: true,
+        attributes: {
+          with: {
+            prices: true,
+            translations: {
+              where: eq(schema.itemAttributeTranslation.language, language),
+            },
+            attribute: {
+              with: {
+                translations: {
+                  where: eq(schema.attributeTranslation.language, language),
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return item || null;
+  }
 }

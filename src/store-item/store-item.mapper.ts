@@ -1,11 +1,17 @@
 import type { ItemWithRelations } from 'src/database/schema';
-import type { StoreItemWithOption, ItemVariant, ItemBasePrice, ItemImage } from 'src/generated-types/store-item';
+import type {
+  StoreItemWithOption,
+  ItemVariant,
+  ItemBasePrice,
+  ItemImage,
+  ItemInfoAttribute,
+} from 'src/generated-types/store-item';
 
 export function mapItemsToResponse(items: ItemWithRelations[]): StoreItemWithOption[] {
   return items.map(mapItem);
 }
 
-function mapItem(item: ItemWithRelations): StoreItemWithOption {
+export function mapItem(item: ItemWithRelations): StoreItemWithOption {
   const translation = item.translations[0];
   const variantAttrs = item.attributes.filter((a) => a.prices.length > 0);
   const infoAttrs = item.attributes.filter((a) => a.prices.length === 0);
@@ -28,12 +34,12 @@ function mapItem(item: ItemWithRelations): StoreItemWithOption {
   };
 }
 
-function mapInfoAttributes(attrs: ItemWithRelations['attributes']): Record<string, string> {
-  const result: Record<string, string> = {};
-  for (const attr of attrs) {
-    result[attr.attribute.slug] = attr.translations[0]?.value ?? '';
-  }
-  return result;
+function mapInfoAttributes(attrs: ItemWithRelations['attributes']): ItemInfoAttribute[] {
+  return attrs.map((attr) => ({
+    slug: attr.attribute.slug,
+    name: attr.attribute.translations[0]?.name ?? attr.attribute.slug,
+    value: attr.translations[0]?.value ?? '',
+  }));
 }
 
 function mapVariant(attr: ItemWithRelations['attributes'][number]): ItemVariant {
@@ -42,7 +48,8 @@ function mapVariant(attr: ItemWithRelations['attributes'][number]): ItemVariant 
 
   return {
     id: attr.id,
-    attributeName: attr.attribute.slug,
+    attributeSlug: attr.attribute.slug,
+    attributeName: attr.attribute.translations[0]?.name ?? attr.attribute.slug,
     attributeValue: attr.translations[0]?.value ?? '',
     regularPrice: regularPrice?.value ?? null,
     discountPrice: discountPrice?.value ?? null,

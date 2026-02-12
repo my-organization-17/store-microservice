@@ -17,6 +17,12 @@ export interface GetStoreItemsByCategoryIdWithOptionRequest {
   language: string;
 }
 
+/** declaration of GetStoreItemByIdRequest message */
+export interface GetStoreItemByIdRequest {
+  itemId: string;
+  language: string;
+}
+
 /** Message representing a list of store items with options */
 export interface StoreItemListWithOption {
   data: StoreItemWithOption[];
@@ -37,17 +43,20 @@ export interface StoreItemWithOption {
   images: ItemImage[];
   variants: ItemVariant[];
   prices: ItemBasePrice[];
-  attributes: { [key: string]: string };
+  attributes: ItemInfoAttribute[];
 }
 
-export interface StoreItemWithOption_AttributesEntry {
-  key: string;
+/** Message representing an informational attribute (no price impact) */
+export interface ItemInfoAttribute {
+  slug: string;
+  name: string;
   value: string;
 }
 
 /** Message representing a product variant (one per attribute value) */
 export interface ItemVariant {
   id: string;
+  attributeSlug: string;
   attributeName: string;
   attributeValue: string;
   regularPrice?: string | null | undefined;
@@ -89,6 +98,10 @@ export interface StoreItemServiceClient {
   getStoreItemsByCategoryIdWithOption(
     request: GetStoreItemsByCategoryIdWithOptionRequest,
   ): Observable<StoreItemListWithOption>;
+
+  /** rpc to get a store item by its ID and language */
+
+  getStoreItemById(request: GetStoreItemByIdRequest): Observable<StoreItemWithOption>;
 }
 
 /** StoreItemService defines the gRPC service for managing store items. */
@@ -99,11 +112,17 @@ export interface StoreItemServiceController {
   getStoreItemsByCategoryIdWithOption(
     request: GetStoreItemsByCategoryIdWithOptionRequest,
   ): Promise<StoreItemListWithOption> | Observable<StoreItemListWithOption> | StoreItemListWithOption;
+
+  /** rpc to get a store item by its ID and language */
+
+  getStoreItemById(
+    request: GetStoreItemByIdRequest,
+  ): Promise<StoreItemWithOption> | Observable<StoreItemWithOption> | StoreItemWithOption;
 }
 
 export function StoreItemServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getStoreItemsByCategoryIdWithOption"];
+    const grpcMethods: string[] = ["getStoreItemsByCategoryIdWithOption", "getStoreItemById"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("StoreItemService", method)(constructor.prototype[method], method, descriptor);

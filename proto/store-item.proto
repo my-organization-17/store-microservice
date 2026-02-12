@@ -8,11 +8,19 @@ import "google/protobuf/timestamp.proto";
 service StoreItemService {
   // rpc to get store items by category ID with options for a specific language
   rpc GetStoreItemsByCategoryIdWithOption(GetStoreItemsByCategoryIdWithOptionRequest) returns (StoreItemListWithOption) {}
+  // rpc to get a store item by its ID and language
+  rpc GetStoreItemById(GetStoreItemByIdRequest) returns (StoreItemWithOption) {}
 }
 
 // declaration of GetStoreItemsByCategoryIdWithOptionRequest message
 message GetStoreItemsByCategoryIdWithOptionRequest {
   string category_id = 1;
+  string language = 2;
+}
+
+// declaration of GetStoreItemByIdRequest message
+message GetStoreItemByIdRequest {
+  string item_id = 1;
   string language = 2;
 }
 
@@ -36,17 +44,25 @@ message StoreItemWithOption {
   repeated ItemImage images = 11;
   repeated ItemVariant variants = 12;
   repeated ItemBasePrice prices = 13;
-  map<string, string> attributes = 14;
+  repeated ItemInfoAttribute attributes = 14;
+}
+
+// Message representing an informational attribute (no price impact)
+message ItemInfoAttribute {
+  string slug = 1;
+  string name = 2;
+  string value = 3;
 }
 
 // Message representing a product variant (one per attribute value)
 message ItemVariant {
   string id = 1;
-  string attribute_name = 2;
-  string attribute_value = 3;
-  optional string regular_price = 4;
-  optional string discount_price = 5;
-  string currency = 6;
+  string attribute_slug = 2;
+  string attribute_name = 3;
+  string attribute_value = 4;
+  optional string regular_price = 5;
+  optional string discount_price = 6;
+  string currency = 7;
 }
 
 // Message representing a base price for items without variants

@@ -44,6 +44,13 @@ A gRPC-based microservice for managing store categories, items, attributes, pric
 | `UpsertStoreCategoryTranslation` | `StoreCategoryTranslationRequest` | `Id` | Create or update translation |
 | `DeleteStoreCategoryTranslation` | `Id { id }` | `StatusResponse` | Delete a translation |
 
+### StoreItemService
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| `GetStoreItemsByCategoryIdWithOption` | `GetStoreItemsByCategoryIdWithOptionRequest` | `StoreItemListWithOption` | Get items by category with translated variants and attributes |
+| `GetStoreItemById` | `GetStoreItemByIdRequest` | `StoreItemWithOption` | Get single item with translated variants and attributes |
+
 ### HealthCheckService
 
 | Method | Request | Response | Description |
@@ -55,14 +62,59 @@ A gRPC-based microservice for managing store categories, items, attributes, pric
 
 ```
 category ──┬── category_translation (1:N)
-            ├── item ──┬── item_translation (1:N)
-            │          ├── item_price (1:N)
-            │          ├── image (1:N)
-            │          └── item_attribute ── item_attribute_translation (1:N)
-            └── attribute ── attribute_translation (1:N)
+            ├── attribute ──── attribute_translation (1:N)
+            └── item ──┬── item_translation (1:N)
+                       ├── image (1:N)
+                       ├── item_price (1:N, optional FK to item_attribute)
+                       └── item_attribute ──┬── item_attribute_translation (1:N)
+                                            └── item_price (1:N, via FK)
 ```
 
+`item_attribute` is a junction table linking an **item** to an **attribute** definition. Each item_attribute can have:
+- **translations** — the attribute value for this item (e.g., "250g", "Washed")
+- **prices** — variant prices (e.g., regular: 249 UAH). If no prices are linked, the attribute is treated as informational (e.g., score: 84)
+
 All tables share base columns: `id` (UUID), `createdAt`, `updatedAt`.
+
+### Table Fill Order
+
+When populating the database, tables must be filled respecting foreign key dependencies:
+
+```
+Level 1 (independent)
+  └── category
+
+Level 2 (depends on category)
+  ├── category_translation
+  ├── attribute
+  └── item
+
+Level 3 (depends on level 2)
+  ├── attribute_translation
+  ├── item_translation
+  ├── image
+  └── item_attribute  (requires both item + attribute)
+
+Level 4 (depends on level 3)
+  ├── item_attribute_translation
+  └── item_price  (requires item, optionally item_attribute)
+```
+
+### Admin Flow Example
+
+Typical sequence for adding a new product:
+
+1. **Category** already exists (via StoreCategoryService)
+2. **Attributes** created once per category (e.g., "weight", "processing-type", "score")
+3. **Attribute translations** added per language (e.g., "weight" -> "Вага")
+4. **Create item** with slug, brand, categoryId
+5. **Add item translations** per language (title, description)
+6. **Link item_attribute** — connect item to attribute (e.g., item -> weight)
+7. **Add item_attribute_translation** — set value per language (e.g., "250g" / "250г")
+8. **Add item_price** — set prices linked to item_attribute (e.g., regular: 249 UAH)
+9. Repeat steps 6-8 for each variant (250g, 1kg, etc.)
+10. For info-only attributes (score, country), do steps 6-7 only (skip prices)
+11. **Upload images** with url, alt text, sort order
 
 ## Environment Variables
 
@@ -128,11 +180,17 @@ src/
 │   ├── health-check.controller.ts
 │   ├── health-check.service.ts
 │   └── health-check.module.ts
-├── store-category/                 # Core business logic
+├── store-category/                 # Category management
 │   ├── store-category.controller.ts
 │   ├── store-category.service.ts
 │   ├── store.category.repository.ts
 │   └── store-category.module.ts
+├── store-item/                     # Item management (read + mapper)
+│   ├── store-item.controller.ts
+│   ├── store-item.service.ts
+│   ├── store-item.repository.ts
+│   ├── store-item.mapper.ts
+│   └── store-item.module.ts
 ├── database/                       # Database layer
 │   ├── database.module.ts
 │   ├── drizzle.config.ts
@@ -173,6 +231,7 @@ npm run test:cov
 
 The service uses protocol buffers for gRPC communication:
 - `proto/store-category.proto` - StoreCategoryService interface
+- `proto/store-item.proto` - StoreItemService interface
 - `proto/health-check.proto` - HealthCheckService interface
 
 ## Network

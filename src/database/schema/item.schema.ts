@@ -1,4 +1,4 @@
-import { boolean, date, int, mysqlTable, varchar } from 'drizzle-orm/mysql-core';
+import { boolean, date, int, mysqlTable, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
 import { baseColumns } from './base-columns';
@@ -11,17 +11,21 @@ import { ItemTranslation, itemTranslation } from './item-translation.schema';
 import { Attribute } from './attribute.schema';
 import { AttributeTranslation } from './attribute-translation.schema';
 
-export const item = mysqlTable('item', {
-  ...baseColumns,
-  slug: varchar({ length: 255 }).notNull(),
-  brand: varchar({ length: 255 }),
-  isAvailable: boolean('is_available').default(true).notNull(),
-  expectedDate: date('expected_date', { mode: 'date' }),
-  sortOrder: int('sort_order').default(0).notNull(),
-  categoryId: varchar('category_id', { length: 36 })
-    .notNull()
-    .references(() => category.id, { onDelete: 'cascade' }),
-});
+export const item = mysqlTable(
+  'item',
+  {
+    ...baseColumns,
+    slug: varchar({ length: 255 }).notNull(),
+    brand: varchar({ length: 255 }),
+    isAvailable: boolean('is_available').default(true).notNull(),
+    expectedDate: date('expected_date', { mode: 'date' }),
+    sortOrder: int('sort_order').default(0).notNull(),
+    categoryId: varchar('category_id', { length: 36 })
+      .notNull()
+      .references(() => category.id, { onDelete: 'cascade' }),
+  },
+  (table) => [uniqueIndex('item_category_slug_unique').on(table.categoryId, table.slug)],
+);
 
 export const itemRelations = relations(item, ({ one, many }) => ({
   category: one(category, {

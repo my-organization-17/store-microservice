@@ -37,12 +37,11 @@ export interface StoreItemWithOption {
   images: ItemImage[];
   variants: ItemVariant[];
   prices: ItemBasePrice[];
-  attributes: ItemInfoAttribute[];
+  attributes: { [key: string]: string };
 }
 
-/** Message representing an informational attribute (no price impact) */
-export interface ItemInfoAttribute {
-  name: string;
+export interface StoreItemWithOption_AttributesEntry {
+  key: string;
   value: string;
 }
 

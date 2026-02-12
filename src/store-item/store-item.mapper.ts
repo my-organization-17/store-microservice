@@ -1,11 +1,5 @@
 import type { ItemWithRelations } from 'src/database/schema';
-import type {
-  StoreItemWithOption,
-  ItemVariant,
-  ItemBasePrice,
-  ItemImage,
-  ItemInfoAttribute,
-} from 'src/generated-types/store-item';
+import type { StoreItemWithOption, ItemVariant, ItemBasePrice, ItemImage } from 'src/generated-types/store-item';
 
 export function mapItemsToResponse(items: ItemWithRelations[]): StoreItemWithOption[] {
   return items.map(mapItem);
@@ -34,11 +28,12 @@ function mapItem(item: ItemWithRelations): StoreItemWithOption {
   };
 }
 
-function mapInfoAttributes(attrs: ItemWithRelations['attributes']): ItemInfoAttribute[] {
-  return attrs.map((attr) => ({
-    name: attr.attribute.slug,
-    value: attr.translations[0]?.value ?? '',
-  }));
+function mapInfoAttributes(attrs: ItemWithRelations['attributes']): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const attr of attrs) {
+    result[attr.attribute.slug] = attr.translations[0]?.value ?? '';
+  }
+  return result;
 }
 
 function mapVariant(attr: ItemWithRelations['attributes'][number]): ItemVariant {

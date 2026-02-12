@@ -36,13 +36,7 @@ message StoreItemWithOption {
   repeated ItemImage images = 11;
   repeated ItemVariant variants = 12;
   repeated ItemBasePrice prices = 13;
-  repeated ItemInfoAttribute attributes = 14;
-}
-
-// Message representing an informational attribute (no price impact)
-message ItemInfoAttribute {
-  string name = 1;
-  string value = 2;
+  map<string, string> attributes = 14;
 }
 
 // Message representing a product variant (one per attribute value)

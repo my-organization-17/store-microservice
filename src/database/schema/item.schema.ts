@@ -29,13 +29,13 @@ export const item = mysqlTable(
 
 export const itemRelations = relations(item, ({ one, many }) => ({
   category: one(category, {
-    fields: [item.categoryId],
-    references: [category.id],
+    fields: [item.categoryId], // Foreign key field in the item table
+    references: [category.id], // Primary key field in the category table
   }),
-  translations: many(itemTranslation),
-  images: many(image),
-  prices: many(itemPrice),
-  attributes: many(itemAttribute),
+  translations: many(itemTranslation), // One-to-many relationship with itemTranslation
+  images: many(image), // One-to-many relationship with image
+  prices: many(itemPrice), // One-to-many relationship with itemPrice
+  attributes: many(itemAttribute), // One-to-many relationship with itemAttribute
 }));
 
 export type Item = typeof item.$inferSelect;

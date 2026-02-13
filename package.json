@@ -17,7 +17,14 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "db:generate": "npx drizzle-kit generate",
+    "db:migrate": "npx drizzle-kit migrate",
+    "db:push": "npx drizzle-kit push",
+    "db:studio": "npx drizzle-kit studio",
+    "db:reset": "npx drizzle-kit reset",
+    "db:check": "npx drizzle-kit check",
+    "db:seed": "npx tsx src/database/seed.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.3",

@@ -21,11 +21,11 @@ export const attribute = mysqlTable(
 
 export const attributeRelations = relations(attribute, ({ one, many }) => ({
   category: one(category, {
-    fields: [attribute.categoryId],
-    references: [category.id],
+    fields: [attribute.categoryId], // Foreign key field in the attribute table
+    references: [category.id], // Primary key field in the category table
   }),
-  translations: many(attributeTranslation),
-  itemAttributes: many(itemAttribute),
+  translations: many(attributeTranslation), // One-to-many relationship with attributeTranslation
+  itemAttributes: many(itemAttribute), // One-to-many relationship with itemAttribute
 }));
 
 export type Attribute = typeof attribute.$inferSelect;

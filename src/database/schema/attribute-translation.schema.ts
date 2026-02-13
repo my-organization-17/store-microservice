@@ -20,8 +20,8 @@ export const attributeTranslation = mysqlTable(
 
 export const attributeTranslationRelations = relations(attributeTranslation, ({ one }) => ({
   attribute: one(attribute, {
-    fields: [attributeTranslation.attributeId],
-    references: [attribute.id],
+    fields: [attributeTranslation.attributeId], // Foreign key field in the attribute_translation table
+    references: [attribute.id], // Primary key field in the attribute table
   }),
 }));
 

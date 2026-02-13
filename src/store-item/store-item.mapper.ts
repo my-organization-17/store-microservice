@@ -30,7 +30,9 @@ export function mapItem(item: ItemWithRelations): StoreItemWithOption {
     description: translation?.description ?? null,
     detailedDescription: translation?.detailedDescription ?? null,
     images: item.images.map(mapImage),
-    variants: variantAttrs.map(mapVariant),
+    variants: variantAttrs
+      .map(mapVariant)
+      .sort((a, b) => ((a.regularPrice ?? 0) as number) - ((b.regularPrice ?? 0) as number)),
     prices: item.prices.filter((p) => !p.itemAttributeId).map(mapBasePrice),
     attributes: mapInfoAttributes(infoAttrs),
   };

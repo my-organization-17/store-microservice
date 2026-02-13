@@ -30,15 +30,15 @@ export const itemAttribute = mysqlTable(
 
 export const itemAttributeRelations = relations(itemAttribute, ({ one, many }) => ({
   item: one(item, {
-    fields: [itemAttribute.itemId],
-    references: [item.id],
+    fields: [itemAttribute.itemId], // Foreign key field in the item_attribute table
+    references: [item.id], // Primary key field in the item table
   }),
   attribute: one(attribute, {
-    fields: [itemAttribute.attributeId],
-    references: [attribute.id],
+    fields: [itemAttribute.attributeId], // Foreign key field in the item_attribute table
+    references: [attribute.id], // Primary key field in the attribute table
   }),
-  translations: many(itemAttributeTranslation),
-  prices: many(itemPrice),
+  translations: many(itemAttributeTranslation), // One-to-many relationship with itemAttributeTranslation
+  prices: many(itemPrice), // One-to-many relationship with itemPrice
 }));
 
 export type ItemAttribute = typeof itemAttribute.$inferSelect;

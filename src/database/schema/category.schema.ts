@@ -14,9 +14,9 @@ export const category = mysqlTable('category', {
 });
 
 export const categoryRelations = relations(category, ({ many }) => ({
-  translations: many(categoryTranslation),
-  items: many(item),
-  attributes: many(attribute),
+  translations: many(categoryTranslation), // One-to-many relationship with categoryTranslation
+  items: many(item), // One-to-many relationship with item
+  attributes: many(attribute), // One-to-many relationship with attribute
 }));
 
 export type Category = typeof category.$inferSelect;

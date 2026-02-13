@@ -46,6 +46,10 @@ async function seed() {
 
   const iaEthiopiaWeightId = uuid();
   const iaEthiopiaRoastId = uuid();
+  const iaHondurasRoastId = uuid();
+  const iaHondurasOriginId = uuid();
+  const iaHondurasProcessingTypeId = uuid();
+  const iaHondurasScoreId = uuid();
   const iaColombiaWeightIdSmall = uuid();
   const iaColombiaWeightIdMedium = uuid();
   const iaColombiaWeightIdLarge = uuid();
@@ -197,6 +201,10 @@ async function seed() {
     { id: iaColombiaWeightIdLarge, itemId: itemColombiaId, attributeId: attrWeightId },
     { id: iaColombiaWeightIdMedium, itemId: itemColombiaId, attributeId: attrWeightId },
     { id: iaColombiaWeightIdSmall, itemId: itemColombiaId, attributeId: attrWeightId },
+    { id: iaHondurasRoastId, itemId: itemHondurasId, attributeId: attrRoastId },
+    { id: iaHondurasOriginId, itemId: itemHondurasId, attributeId: attrOriginId },
+    { id: iaHondurasProcessingTypeId, itemId: itemHondurasId, attributeId: attrProcessingTypeId },
+    { id: iaHondurasScoreId, itemId: itemHondurasId, attributeId: attrScoreId },
     { id: iaV60MaterialId, itemId: itemV60Id, attributeId: attrMaterialId },
   ]);
 
@@ -212,6 +220,14 @@ async function seed() {
     { itemAttributeId: iaColombiaWeightIdMedium, language: 'ua', value: '500г' },
     { itemAttributeId: iaColombiaWeightIdSmall, language: 'en', value: '250g' },
     { itemAttributeId: iaColombiaWeightIdSmall, language: 'ua', value: '250г' },
+    { itemAttributeId: iaHondurasRoastId, language: 'en', value: 'Medium' },
+    { itemAttributeId: iaHondurasRoastId, language: 'ua', value: 'Середній' },
+    { itemAttributeId: iaHondurasOriginId, language: 'en', value: 'Copan' },
+    { itemAttributeId: iaHondurasOriginId, language: 'ua', value: 'Копан' },
+    { itemAttributeId: iaHondurasProcessingTypeId, language: 'en', value: 'Washed' },
+    { itemAttributeId: iaHondurasProcessingTypeId, language: 'ua', value: 'Митий' },
+    { itemAttributeId: iaHondurasScoreId, language: 'en', value: '85' },
+    { itemAttributeId: iaHondurasScoreId, language: 'ua', value: '85' },
     { itemAttributeId: iaV60MaterialId, language: 'en', value: 'Ceramic' },
     { itemAttributeId: iaV60MaterialId, language: 'ua', value: 'Кераміка' },
   ]);

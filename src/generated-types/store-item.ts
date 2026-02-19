@@ -11,9 +11,20 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "store_item.v1";
 
-/** declaration of GetStoreItemsByCategoryIdWithOptionRequest message */
-export interface GetStoreItemsByCategoryIdWithOptionRequest {
+/** declaration of Id message */
+export interface Id {
+  id: string;
+}
+
+/** declaration of GetStoreItemsByCategoryIdRequest message */
+export interface GetStoreItemsByCategoryIdRequest {
   categoryId: string;
+  language: string;
+}
+
+/** declaration of GetStoreItemsByCategorySlugRequest message */
+export interface GetStoreItemsByCategorySlugRequest {
+  categorySlug: string;
   language: string;
 }
 
@@ -21,6 +32,98 @@ export interface GetStoreItemsByCategoryIdWithOptionRequest {
 export interface GetStoreItemByIdRequest {
   itemId: string;
   language: string;
+}
+
+/** declaration of CreateStoreItemRequest message */
+export interface CreateStoreItemRequest {
+  categoryId: string;
+  slug: string;
+  brand?: string | null | undefined;
+  isAvailable?: boolean | null | undefined;
+  expectedDate?: Date | null | undefined;
+}
+
+/** declaration of UpdateStoreItemRequest message */
+export interface UpdateStoreItemRequest {
+  itemId: string;
+  categoryId?: string | null | undefined;
+  slug?: string | null | undefined;
+  brand?: string | null | undefined;
+  isAvailable?: boolean | null | undefined;
+  expectedDate?: Date | null | undefined;
+}
+
+/** declaration of StoreItemTranslationRequest message */
+export interface StoreItemTranslationRequest {
+  itemId: string;
+  language: string;
+  title: string;
+  description?: string | null | undefined;
+  detailedDescription?: string | null | undefined;
+}
+
+/** declaration of AddStoreItemImageRequest message */
+export interface AddStoreItemImageRequest {
+  itemId: string;
+  url: string;
+  alt?: string | null | undefined;
+  sortOrder?: number | null | undefined;
+}
+
+/** declaration of ChangeStoreItemImagePositionRequest message */
+export interface ChangeStoreItemImagePositionRequest {
+  imageId: string;
+  sortOrder: number;
+}
+
+/** declaration of ChangeStoreItemPositionRequest message */
+export interface ChangeStoreItemPositionRequest {
+  itemId: string;
+  sortOrder: number;
+}
+
+/**
+ * declaration of AddStoreItemVariantRequest message
+ * links an existing attribute (created via StoreAttributeService) to a store item — admin flow step 6
+ */
+export interface AddStoreItemVariantRequest {
+  itemId: string;
+  attributeId: string;
+}
+
+/**
+ * declaration of UpsertItemAttributeTranslationRequest message
+ * sets the translated value for a variant in a specific language — admin flow step 7
+ */
+export interface UpsertItemAttributeTranslationRequest {
+  itemAttributeId: string;
+  language: string;
+  value: string;
+}
+
+/**
+ * declaration of AddVariantPriceRequest message
+ * adds a price for a variant (item_attribute) — admin flow step 8
+ */
+export interface AddVariantPriceRequest {
+  itemAttributeId: string;
+  priceType: string;
+  value: string;
+  currency?: string | null | undefined;
+}
+
+/** declaration of AddStoreItemBasePriceRequest message */
+export interface AddStoreItemBasePriceRequest {
+  itemId: string;
+  priceType: string;
+  value: string;
+  currency?: string | null | undefined;
+}
+
+/** Message representing a status response */
+export interface StatusResponse {
+  success: boolean;
+  message: string;
 }
 
 /** Message representing a list of store items with options */
@@ -67,6 +170,7 @@ export interface ItemVariant {
 
 /** Message representing a base price for items without variants */
 export interface ItemBasePrice {
+  id: string;
   priceType: string;
   value: string;
   currency: string;
@@ -96,13 +200,81 @@ wrappers[".google.protobuf.Timestamp"] = {
 export interface StoreItemServiceClient {
   /** rpc to get store items by category ID with options for a specific language */
 
-  getStoreItemsByCategoryIdWithOption(
-    request: GetStoreItemsByCategoryIdWithOptionRequest,
+  getStoreItemsByCategoryIdWithOption(request: GetStoreItemsByCategoryIdRequest): Observable<StoreItemListWithOption>;
+
+  /** rpc to get store items by category slug with options for a specific language */
+
+  getStoreItemsByCategorySlugWithOption(
+    request: GetStoreItemsByCategorySlugRequest,
   ): Observable<StoreItemListWithOption>;
 
   /** rpc to get a store item by its ID and language */
 
   getStoreItemById(request: GetStoreItemByIdRequest): Observable<StoreItemWithOption>;
+
+  /** rpc to create a new store item */
+
+  createStoreItem(request: CreateStoreItemRequest): Observable<Id>;
+
+  /** rpc to update an existing store item */
+
+  updateStoreItem(request: UpdateStoreItemRequest): Observable<Id>;
+
+  /** rpc to delete a store item by its ID */
+
+  deleteStoreItem(request: Id): Observable<StatusResponse>;
+
+  /** rpc to create or update a store item translation */
+
+  upsertStoreItemTranslation(request: StoreItemTranslationRequest): Observable<Id>;
+
+  /** rpc to delete a store item translation by its ID */
+
+  deleteStoreItemTranslation(request: Id): Observable<StatusResponse>;
+
+  /** rpc to add an image to a store item */
+
+  addStoreItemImage(request: AddStoreItemImageRequest): Observable<Id>;
+
+  /** rpc to remove an image from a store item */
+
+  removeStoreItemImage(request: Id): Observable<StatusResponse>;
+
+  /** rpc to change the position of a store item image */
+
+  changeStoreItemImagePosition(request: ChangeStoreItemImagePositionRequest): Observable<Id>;
+
+  /** rpc to change the position of a store item */
+
+  changeStoreItemPosition(request: ChangeStoreItemPositionRequest): Observable<StoreItemWithOption>;
+
+  /** rpc to link an existing attribute to a store item (admin flow step 6) */
+
+  addStoreItemVariant(request: AddStoreItemVariantRequest): Observable<Id>;
+
+  /** rpc to remove a variant (item_attribute link) from a store item */
+
+  removeStoreItemVariant(request: Id): Observable<StatusResponse>;
+
+  /** rpc to create or update the translated value for a variant in a specific language (admin flow step 7) */
+
+  upsertItemAttributeTranslation(request: UpsertItemAttributeTranslationRequest): Observable<Id>;
+
+  /** rpc to add a price for a variant (admin flow step 8) */
+
+  addVariantPrice(request: AddVariantPriceRequest): Observable<Id>;
+
+  /** rpc to remove a variant price by its ID */
+
+  removeVariantPrice(request: Id): Observable<StatusResponse>;
+
+  /** rpc to add a base price to a store item (for items without variants) */
+
+  addStoreItemBasePrice(request: AddStoreItemBasePriceRequest): Observable<Id>;
+
+  /** rpc to remove a base price from a store item */
+
+  removeStoreItemBasePrice(request: Id): Observable<StatusResponse>;
 }
 
 /** StoreItemService defines the gRPC service for managing store items. */
@@ -111,7 +283,13 @@ export interface StoreItemServiceController {
   /** rpc to get store items by category ID with options for a specific language */
 
   getStoreItemsByCategoryIdWithOption(
-    request: GetStoreItemsByCategoryIdWithOptionRequest,
+    request: GetStoreItemsByCategoryIdRequest,
+  ): Promise<StoreItemListWithOption> | Observable<StoreItemListWithOption> | StoreItemListWithOption;
+
+  /** rpc to get store items by category slug with options for a specific language */
+
+  getStoreItemsByCategorySlugWithOption(
+    request: GetStoreItemsByCategorySlugRequest,
   ): Promise<StoreItemListWithOption> | Observable<StoreItemListWithOption> | StoreItemListWithOption;
 
   /** rpc to get a store item by its ID and language */
@@ -119,11 +297,97 @@ export interface StoreItemServiceController {
   getStoreItemById(
     request: GetStoreItemByIdRequest,
   ): Promise<StoreItemWithOption> | Observable<StoreItemWithOption> | StoreItemWithOption;
+
+  /** rpc to create a new store item */
+
+  createStoreItem(request: CreateStoreItemRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to update an existing store item */
+
+  updateStoreItem(request: UpdateStoreItemRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to delete a store item by its ID */
+
+  deleteStoreItem(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+
+  /** rpc to create or update a store item translation */
+
+  upsertStoreItemTranslation(request: StoreItemTranslationRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to delete a store item translation by its ID */
+
+  deleteStoreItemTranslation(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+
+  /** rpc to add an image to a store item */
+
+  addStoreItemImage(request: AddStoreItemImageRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to remove an image from a store item */
+
+  removeStoreItemImage(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+
+  /** rpc to change the position of a store item image */
+
+  changeStoreItemImagePosition(request: ChangeStoreItemImagePositionRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to change the position of a store item */
+
+  changeStoreItemPosition(
+    request: ChangeStoreItemPositionRequest,
+  ): Promise<StoreItemWithOption> | Observable<StoreItemWithOption> | StoreItemWithOption;
+
+  /** rpc to link an existing attribute to a store item (admin flow step 6) */
+
+  addStoreItemVariant(request: AddStoreItemVariantRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to remove a variant (item_attribute link) from a store item */
+
+  removeStoreItemVariant(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+
+  /** rpc to create or update the translated value for a variant in a specific language (admin flow step 7) */
+
+  upsertItemAttributeTranslation(request: UpsertItemAttributeTranslationRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to add a price for a variant (admin flow step 8) */
+
+  addVariantPrice(request: AddVariantPriceRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to remove a variant price by its ID */
+
+  removeVariantPrice(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
+
+  /** rpc to add a base price to a store item (for items without variants) */
+
+  addStoreItemBasePrice(request: AddStoreItemBasePriceRequest): Promise<Id> | Observable<Id> | Id;
+
+  /** rpc to remove a base price from a store item */
+
+  removeStoreItemBasePrice(request: Id): Promise<StatusResponse> | Observable<StatusResponse> | StatusResponse;
 }
 
 export function StoreItemServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getStoreItemsByCategoryIdWithOption", "getStoreItemById"];
+    const grpcMethods: string[] = [
+      "getStoreItemsByCategoryIdWithOption",
+      "getStoreItemsByCategorySlugWithOption",
+      "getStoreItemById",
+      "createStoreItem",
+      "updateStoreItem",
+      "deleteStoreItem",
+      "upsertStoreItemTranslation",
+      "deleteStoreItemTranslation",
+      "addStoreItemImage",
+      "removeStoreItemImage",
+      "changeStoreItemImagePosition",
+      "changeStoreItemPosition",
+      "addStoreItemVariant",
+      "removeStoreItemVariant",
+      "upsertItemAttributeTranslation",
+      "addVariantPrice",
+      "removeVariantPrice",
+      "addStoreItemBasePrice",
+      "removeStoreItemBasePrice",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("StoreItemService", method)(constructor.prototype[method], method, descriptor);

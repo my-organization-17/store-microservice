@@ -65,6 +65,7 @@ function mapVariant(attr: ItemWithRelations['attributes'][number]): ItemVariant 
 
 function mapBasePrice(price: ItemWithRelations['prices'][number]): ItemBasePrice {
   return {
+    id: price.id,
     priceType: price.priceType,
     value: price.value,
     currency: price.currency,

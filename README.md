@@ -15,9 +15,13 @@ A gRPC-based microservice for managing store categories, items, attributes, pric
 ## Features
 
 - **Category Management** - Create, update, delete, and reorder store categories
+- **Item Management** - Full CRUD for store items with automatic sort order management
+- **Variant Management** - Link category attributes to items as purchasable variants with per-language values and prices
+- **Image Management** - Add, remove, and reorder product images
+- **Price Management** - Base prices for simple items and per-variant prices (regular, discount, wholesale)
 - **Multi-Language Support** - Translations for 6 languages (English, Ukrainian, Russian, German, Spanish, French)
-- **Smart Positioning** - Automatic sort order adjustment when reordering categories
-- **Translation CRUD** - Upsert and delete translations for categories independently
+- **Smart Positioning** - Automatic sort order adjustment when reordering items and images
+- **Translation CRUD** - Upsert and delete translations for items and item attribute values independently
 - **Health Checks** - Liveness and readiness endpoints with dependency status
 
 ## Technology Stack
@@ -46,10 +50,54 @@ A gRPC-based microservice for managing store categories, items, attributes, pric
 
 ### StoreItemService
 
+**Read**
+
 | Method | Request | Response | Description |
 |--------|---------|----------|-------------|
-| `GetStoreItemsByCategoryIdWithOption` | `GetStoreItemsByCategoryIdWithOptionRequest` | `StoreItemListWithOption` | Get items by category with translated variants and attributes |
+| `GetStoreItemsByCategoryIdWithOption` | `GetStoreItemsByCategoryIdRequest` | `StoreItemListWithOption` | Get items by category ID with translated variants and attributes |
+| `GetStoreItemsByCategorySlugWithOption` | `GetStoreItemsByCategorySlugRequest` | `StoreItemListWithOption` | Get items by category slug with translated variants and attributes |
 | `GetStoreItemById` | `GetStoreItemByIdRequest` | `StoreItemWithOption` | Get single item with translated variants and attributes |
+
+**Item CRUD**
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| `CreateStoreItem` | `CreateStoreItemRequest` | `Id` | Create a new store item |
+| `UpdateStoreItem` | `UpdateStoreItemRequest` | `Id` | Update item fields (slug, brand, availability, etc.) |
+| `DeleteStoreItem` | `Id` | `StatusResponse` | Delete item with cascading and sibling position adjustment |
+| `ChangeStoreItemPosition` | `ChangeStoreItemPositionRequest` | `StoreItemWithOption` | Reorder item within its category |
+
+**Item Translations**
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| `UpsertStoreItemTranslation` | `StoreItemTranslationRequest` | `Id` | Create or update item title/description for a language |
+| `DeleteStoreItemTranslation` | `Id` | `StatusResponse` | Delete a specific item translation |
+
+**Images**
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| `AddStoreItemImage` | `AddStoreItemImageRequest` | `Id` | Upload an image for a store item (returns image id) |
+| `RemoveStoreItemImage` | `Id` | `StatusResponse` | Remove an image by its id |
+| `ChangeStoreItemImagePosition` | `ChangeStoreItemImagePositionRequest` | `Id` | Update the sort order of an image |
+
+**Variants (admin flow steps 6–8)**
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| `AddStoreItemVariant` | `AddStoreItemVariantRequest` | `Id` | Link an existing attribute to an item; returns `item_attribute_id` |
+| `RemoveStoreItemVariant` | `Id` | `StatusResponse` | Remove a variant link (cascades to its translations and prices) |
+| `UpsertItemAttributeTranslation` | `UpsertItemAttributeTranslationRequest` | `Id` | Set the variant value for a specific language (e.g. "250g" / "250г") |
+| `AddVariantPrice` | `AddVariantPriceRequest` | `Id` | Add a price type (regular/discount/wholesale) for a variant |
+| `RemoveVariantPrice` | `Id` | `StatusResponse` | Remove a variant price by its id |
+
+**Base Prices (items without variants)**
+
+| Method | Request | Response | Description |
+|--------|---------|----------|-------------|
+| `AddStoreItemBasePrice` | `AddStoreItemBasePriceRequest` | `Id` | Add a base price not linked to any variant |
+| `RemoveStoreItemBasePrice` | `Id` | `StatusResponse` | Remove a base price by its id |
 
 ### HealthCheckService
 
@@ -102,19 +150,66 @@ Level 4 (depends on level 3)
 
 ### Admin Flow Example
 
-Typical sequence for adding a new product:
+Typical sequence for adding a new product. Steps 2–3 are performed via `StoreAttributeService`; steps 4–11 via `StoreItemService`.
 
-1. **Category** already exists (via StoreCategoryService)
-2. **Attributes** created once per category (e.g., "weight", "processing-type", "score")
-3. **Attribute translations** added per language (e.g., "weight" -> "Вага")
-4. **Create item** with slug, brand, categoryId
-5. **Add item translations** per language (title, description)
-6. **Link item_attribute** — connect item to attribute (e.g., item -> weight)
-7. **Add item_attribute_translation** — set value per language (e.g., "250g" / "250г")
-8. **Add item_price** — set prices linked to item_attribute (e.g., regular: 249 UAH)
-9. Repeat steps 6-8 for each variant (250g, 1kg, etc.)
-10. For info-only attributes (score, country), do steps 6-7 only (skip prices)
-11. **Upload images** with url, alt text, sort order
+**1. Category already exists** (via `StoreCategoryService`)
+
+**2. Create attributes once per category** (via `StoreAttributeService`)
+```
+CreateAttribute { categoryId, slug: "weight" }         → Id (attributeId)
+CreateAttribute { categoryId, slug: "processing-type" } → Id (attributeId)
+CreateAttribute { categoryId, slug: "score" }           → Id (attributeId)
+```
+
+**3. Add attribute translations per language** (via `StoreAttributeService`)
+```
+UpsertAttributeTranslation { attributeId, language: "en", name: "Weight" }
+UpsertAttributeTranslation { attributeId, language: "ua", name: "Вага" }
+```
+
+**4. Create the item**
+```
+CreateStoreItem { categoryId, slug: "colombia-el-paraiso", brand: "..." } → Id (itemId)
+```
+
+**5. Add item translations per language**
+```
+UpsertStoreItemTranslation { itemId, language: "en", title: "Colombia El Paraíso", description: "..." }
+UpsertStoreItemTranslation { itemId, language: "ua", title: "Колумбія Ель Параісо", description: "..." }
+```
+
+**6. Link item to attribute** (one call per variant)
+```
+AddStoreItemVariant { itemId, attributeId: <weight-id> } → Id (itemAttributeId)
+```
+
+**7. Set the value per language** for that variant
+```
+UpsertItemAttributeTranslation { itemAttributeId, language: "en", value: "250g" }
+UpsertItemAttributeTranslation { itemAttributeId, language: "ua", value: "250г" }
+```
+
+**8. Add prices** for the variant
+```
+AddVariantPrice { itemAttributeId, priceType: "regular",   value: "249", currency: "UAH" }
+AddVariantPrice { itemAttributeId, priceType: "discount",  value: "199", currency: "UAH" }
+AddVariantPrice { itemAttributeId, priceType: "wholesale", value: "180", currency: "UAH" }
+```
+
+**9. Repeat steps 6–8 for each variant** (e.g. 1kg, 5kg)
+
+**10. For info-only attributes** (score, country of origin) — do steps 6–7 only, skip step 8
+```
+AddStoreItemVariant { itemId, attributeId: <score-id> }  → Id (itemAttributeId)
+UpsertItemAttributeTranslation { itemAttributeId, language: "en", value: "84" }
+```
+> Items with `item_attribute` entries that have no linked `item_price` rows are automatically treated as informational attributes in the response (`attributes` field), not as purchasable variants (`variants` field).
+
+**11. Upload images**
+```
+AddStoreItemImage { itemId, url: "https://...", alt: "Front view", sortOrder: 1 } → Id (imageId)
+AddStoreItemImage { itemId, url: "https://...", alt: "Side view",  sortOrder: 2 } → Id (imageId)
+```
 
 ## Environment Variables
 

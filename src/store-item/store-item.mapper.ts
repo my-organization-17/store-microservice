@@ -1,11 +1,43 @@
 import type { ItemWithRelations } from 'src/database/schema';
+import type { PriceType as DbPriceType } from 'src/database/enums/price-type.enum';
+import type { Currency as DbCurrency } from 'src/database/enums/currency.enum';
 import type {
   StoreItemWithOption,
   ItemVariant,
   ItemBasePrice,
   ItemImage,
   ItemInfoAttribute,
+  PriceType,
+  Currency,
 } from 'src/generated-types/store-item';
+
+// DB string → proto PriceType integer
+// PRICE_TYPE_REGULAR = 1, PRICE_TYPE_DISCOUNT = 2, PRICE_TYPE_WHOLESALE = 3
+function mapDbPriceType(priceType: DbPriceType): PriceType {
+  switch (priceType) {
+    case 'regular':
+      return 1 as PriceType;
+    case 'discount':
+      return 2 as PriceType;
+    case 'wholesale':
+      return 3 as PriceType;
+  }
+}
+
+// DB string → proto Currency integer
+// CURRENCY_USD = 1, CURRENCY_EUR = 2, CURRENCY_GBP = 3, CURRENCY_UAH = 4
+function mapDbCurrency(currency: DbCurrency): Currency {
+  switch (currency) {
+    case 'USD':
+      return 1 as Currency;
+    case 'EUR':
+      return 2 as Currency;
+    case 'GBP':
+      return 3 as Currency;
+    case 'UAH':
+      return 4 as Currency;
+  }
+}
 
 export function mapItemsToResponse(items: ItemWithRelations[]): StoreItemWithOption[] {
   return items.map(mapItem);
@@ -59,16 +91,16 @@ function mapVariant(attr: ItemWithRelations['attributes'][number]): ItemVariant 
     regularPrice: regularPrice?.value ?? null,
     discountPrice: discountPrice?.value ?? null,
     wholesalePrice: wholesalePrice?.value ?? null,
-    currency: regularPrice?.currency ?? discountPrice?.currency ?? wholesalePrice?.currency ?? 'UAH',
+    currency: mapDbCurrency(regularPrice?.currency ?? discountPrice?.currency ?? wholesalePrice?.currency ?? 'UAH'),
   };
 }
 
 function mapBasePrice(price: ItemWithRelations['prices'][number]): ItemBasePrice {
   return {
     id: price.id,
-    priceType: price.priceType,
+    priceType: mapDbPriceType(price.priceType),
     value: price.value,
-    currency: price.currency,
+    currency: mapDbCurrency(price.currency),
   };
 }
 

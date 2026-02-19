@@ -14,7 +14,7 @@ import type {
   StoreCategoryWithTranslations,
   UpdateStoreCategoryRequest,
 } from 'src/generated-types/store-category';
-import type { LanguageEnum } from 'src/database/language.enum';
+import type { LanguageEnum } from 'src/database/enums/language.enum';
 
 @Injectable()
 export class StoreCategoryService {

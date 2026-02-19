@@ -12,7 +12,7 @@ import type {
   StatusResponse,
   UpdateAttributeRequest,
 } from 'src/generated-types/store-attribute';
-import type { LanguageEnum } from 'src/database/language.enum';
+import type { LanguageEnum } from 'src/database/enums/language.enum';
 
 @Injectable()
 export class StoreAttributeService {

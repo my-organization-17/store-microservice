@@ -22,7 +22,6 @@ import {
   type UpdateStoreItemRequest,
   type UpsertItemAttributeTranslationRequest,
 } from 'src/generated-types/store-item';
-import type { LanguageEnum } from 'src/database/language.enum';
 
 @Controller()
 export class StoreItemController {
@@ -34,10 +33,7 @@ export class StoreItemController {
     this.logger.debug(
       `Received request to find store items for category id: ${data.categoryId} with language: ${data.language}`,
     );
-    return await this.storeItemService.getStoreItemsByCategoryIdWithTranslation(
-      data.categoryId,
-      data.language as LanguageEnum,
-    );
+    return await this.storeItemService.getStoreItemsByCategoryIdWithTranslation(data.categoryId, data.language);
   }
 
   @GrpcMethod(STORE_ITEM_SERVICE_NAME, 'GetStoreItemsByCategorySlugWithOption')
@@ -47,16 +43,13 @@ export class StoreItemController {
     this.logger.debug(
       `Received request to find store items for category slug: ${data.categorySlug} with language: ${data.language}`,
     );
-    return await this.storeItemService.getStoreItemsByCategorySlugWithTranslation(
-      data.categorySlug,
-      data.language as LanguageEnum,
-    );
+    return await this.storeItemService.getStoreItemsByCategorySlugWithTranslation(data.categorySlug, data.language);
   }
 
   @GrpcMethod(STORE_ITEM_SERVICE_NAME, 'GetStoreItemById')
   async getStoreItemById(data: GetStoreItemByIdRequest): Promise<StoreItemWithOption | null> {
     this.logger.debug(`Received request to find store item for id: ${data.itemId} with language: ${data.language}`);
-    return await this.storeItemService.getStoreItemByIdWithTranslation(data.itemId, data.language as LanguageEnum);
+    return await this.storeItemService.getStoreItemByIdWithTranslation(data.itemId, data.language);
   }
 
   @GrpcMethod(STORE_ITEM_SERVICE_NAME, 'CreateStoreItem')

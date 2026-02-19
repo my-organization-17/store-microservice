@@ -3,17 +3,14 @@ import { drizzle } from 'drizzle-orm/mysql2';
 import { and, asc, eq, max } from 'drizzle-orm';
 
 import * as schema from 'src/database/schema';
-import type { LanguageEnum } from 'src/database/language.enum';
+import type { LanguageEnum } from 'src/database/enums/language.enum';
+import type { Currency, PriceType } from 'src/database/enums';
 import type {
-  AddStoreItemBasePriceRequest,
   AddStoreItemImageRequest,
   AddStoreItemVariantRequest,
-  AddVariantPriceRequest,
   CreateStoreItemRequest,
   Id,
-  StoreItemTranslationRequest,
   UpdateStoreItemRequest,
-  UpsertItemAttributeTranslationRequest,
 } from 'src/generated-types/store-item';
 
 @Injectable()
@@ -207,16 +204,19 @@ export class StoreItemRepository {
   }
 
   // create or update store item translation
-  async upsertStoreItemTranslation(data: StoreItemTranslationRequest): Promise<void> {
+  async upsertStoreItemTranslation(data: {
+    itemId: string;
+    language: LanguageEnum;
+    title: string;
+    description?: string | null;
+    detailedDescription?: string | null;
+  }): Promise<void> {
     this.logger.debug(
       `Upserting store item translation for itemId: ${data.itemId}, language: ${data.language}, data: ${JSON.stringify(data)}`,
     );
     await this.drizzleDb.transaction(async (tx) => {
       const existingTranslation = await tx.query.itemTranslation.findFirst({
-        where: and(
-          eq(schema.itemTranslation.itemId, data.itemId),
-          eq(schema.itemTranslation.language, data.language as LanguageEnum),
-        ),
+        where: and(eq(schema.itemTranslation.itemId, data.itemId), eq(schema.itemTranslation.language, data.language)),
       });
 
       if (existingTranslation) {
@@ -230,9 +230,11 @@ export class StoreItemRepository {
           .where(eq(schema.itemTranslation.id, existingTranslation.id));
       } else {
         await tx.insert(schema.itemTranslation).values({
-          ...data,
           itemId: data.itemId,
-          language: data.language as LanguageEnum,
+          language: data.language,
+          title: data.title,
+          description: data.description || null,
+          detailedDescription: data.detailedDescription || null,
         });
       }
     });
@@ -303,19 +305,28 @@ export class StoreItemRepository {
   }
 
   // create or update the translated value for a variant in a specific language (admin flow step 7)
-  async upsertItemAttributeTranslation(data: UpsertItemAttributeTranslationRequest): Promise<Id> {
+  async upsertItemAttributeTranslation(data: {
+    itemAttributeId: string;
+    language: LanguageEnum;
+    value: string;
+  }): Promise<Id> {
     this.logger.debug(
       `Upserting item attribute translation for item_attribute ${data.itemAttributeId}, language: ${data.language}`,
     );
     await this.drizzleDb
       .insert(schema.itemAttributeTranslation)
-      .values({ itemAttributeId: data.itemAttributeId, language: data.language as LanguageEnum, value: data.value })
+      .values({ itemAttributeId: data.itemAttributeId, language: data.language, value: data.value })
       .onDuplicateKeyUpdate({ set: { value: data.value } });
     return { id: data.itemAttributeId };
   }
 
   // add a price for a variant; looks up the itemId from item_attribute (admin flow step 8)
-  async addVariantPrice(data: AddVariantPriceRequest): Promise<Id> {
+  async addVariantPrice(data: {
+    itemAttributeId: string;
+    priceType: PriceType;
+    value: string;
+    currency: Currency;
+  }): Promise<Id> {
     this.logger.debug(`Adding variant price for item_attribute ${data.itemAttributeId}: ${JSON.stringify(data)}`);
     const itemAttribute = await this.drizzleDb.query.itemAttribute.findFirst({
       where: eq(schema.itemAttribute.id, data.itemAttributeId),
@@ -328,9 +339,9 @@ export class StoreItemRepository {
       .values({
         itemId: itemAttribute.itemId,
         itemAttributeId: data.itemAttributeId,
-        priceType: data.priceType as 'regular' | 'discount' | 'wholesale',
+        priceType: data.priceType,
         value: data.value,
-        currency: data.currency ?? 'UAH',
+        currency: data.currency,
       })
       .$returningId();
     return { id: created.id };
@@ -349,15 +360,20 @@ export class StoreItemRepository {
   }
 
   // add a base price to a store item (not linked to any variant)
-  async addStoreItemBasePrice(data: AddStoreItemBasePriceRequest): Promise<Id> {
+  async addStoreItemBasePrice(data: {
+    itemId: string;
+    priceType: PriceType;
+    value: string;
+    currency: Currency;
+  }): Promise<Id> {
     this.logger.debug(`Adding base price to item ${data.itemId}: ${JSON.stringify(data)}`);
     const [created] = await this.drizzleDb
       .insert(schema.itemPrice)
       .values({
         itemId: data.itemId,
-        priceType: data.priceType as 'regular' | 'discount' | 'wholesale',
+        priceType: data.priceType,
         value: data.value,
-        currency: data.currency ?? 'UAH',
+        currency: data.currency,
       })
       .$returningId();
     return { id: created.id };

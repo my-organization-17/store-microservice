@@ -4,7 +4,7 @@ import { eq, max, asc } from 'drizzle-orm';
 
 import * as schema from 'src/database/schema';
 import type { UpdateAttributeRequest } from 'src/generated-types/store-attribute';
-import type { LanguageEnum } from 'src/database/language.enum';
+import type { LanguageEnum } from 'src/database/enums/language.enum';
 
 @Injectable()
 export class StoreAttributeRepository {

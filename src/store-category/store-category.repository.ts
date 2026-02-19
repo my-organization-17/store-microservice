@@ -3,9 +3,9 @@ import { drizzle, MySqlRawQueryResult } from 'drizzle-orm/mysql2';
 import { eq, and, max, asc } from 'drizzle-orm';
 
 import * as schema from 'src/database/schema';
-import { DEFAULT_LANGUAGE } from 'src/database/language.enum';
+import { DEFAULT_LANGUAGE } from 'src/database/enums/language.enum';
 import type { UpdateStoreCategoryRequest } from 'src/generated-types/store-category';
-import type { LanguageEnum } from 'src/database/language.enum';
+import type { LanguageEnum } from 'src/database/enums/language.enum';
 
 @Injectable()
 export class StoreCategoryRepository {

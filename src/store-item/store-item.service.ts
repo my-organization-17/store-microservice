@@ -2,8 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { AppError } from 'src/utils/errors/app-error';
 import { StoreItemRepository } from './store-item.repository';
-import type { LanguageEnum } from 'src/database/language.enum';
-import { DEFAULT_LANGUAGE } from 'src/database/language.enum';
+import { DEFAULT_LANGUAGE, type LanguageEnum } from 'src/database/enums/language.enum';
+import type { PriceType as DbPriceType } from 'src/database/enums/price-type.enum';
+import type { Currency as DbCurrency } from 'src/database/enums/currency.enum';
 import type {
   AddStoreItemBasePriceRequest,
   AddStoreItemImageRequest,
@@ -22,6 +23,59 @@ import type {
 } from 'src/generated-types/store-item';
 import { mapItem, mapItemsToResponse } from './store-item.mapper';
 
+// Proto Language integer → DB LanguageEnum string
+// LANGUAGE_EN = 1, LANGUAGE_UA = 2, LANGUAGE_RU = 3, LANGUAGE_DE = 4, LANGUAGE_ES = 5, LANGUAGE_FR = 6
+function mapLanguage(language: number): LanguageEnum {
+  switch (language) {
+    case 1:
+      return 'en';
+    case 2:
+      return 'ua';
+    case 3:
+      return 'ru';
+    case 4:
+      return 'de';
+    case 5:
+      return 'es';
+    case 6:
+      return 'fr';
+    default:
+      throw new Error(`Unsupported language: ${language}`);
+  }
+}
+
+// Proto PriceType integer → DB PriceType string
+// PRICE_TYPE_REGULAR = 1, PRICE_TYPE_DISCOUNT = 2, PRICE_TYPE_WHOLESALE = 3
+function mapPriceType(priceType: number): DbPriceType {
+  switch (priceType) {
+    case 1:
+      return 'regular';
+    case 2:
+      return 'discount';
+    case 3:
+      return 'wholesale';
+    default:
+      throw new Error(`Unsupported price type: ${priceType}`);
+  }
+}
+
+// Proto Currency integer → DB Currency string
+// CURRENCY_USD = 1, CURRENCY_EUR = 2, CURRENCY_GBP = 3, CURRENCY_UAH = 4
+function mapCurrency(currency: number): DbCurrency {
+  switch (currency) {
+    case 1:
+      return 'USD';
+    case 2:
+      return 'EUR';
+    case 3:
+      return 'GBP';
+    case 4:
+      return 'UAH';
+    default:
+      throw new Error(`Unsupported currency: ${currency}`);
+  }
+}
+
 @Injectable()
 export class StoreItemService {
   private readonly logger = new Logger(StoreItemService.name);
@@ -30,13 +84,16 @@ export class StoreItemService {
   // get store items by store category id with translations for a specific language
   async getStoreItemsByCategoryIdWithTranslation(
     categoryId: string,
-    language: LanguageEnum,
+    language: number,
   ): Promise<StoreItemListWithOption> {
     this.logger.debug(
       `Fetching store items for category id: ${categoryId} with translations for language: ${language}`,
     );
     try {
-      const items = await this.storeItemRepository.findStoreItemsByCategoryIdWithTranslation(categoryId, language);
+      const items = await this.storeItemRepository.findStoreItemsByCategoryIdWithTranslation(
+        categoryId,
+        mapLanguage(language),
+      );
       if (!items || items.length === 0) {
         this.logger.warn(`No store items found for category id: ${categoryId} and language: ${language}`);
         return { data: [] };
@@ -51,13 +108,16 @@ export class StoreItemService {
   // get store items by store category slug with translations for a specific language
   async getStoreItemsByCategorySlugWithTranslation(
     categorySlug: string,
-    language: LanguageEnum,
+    language: number,
   ): Promise<StoreItemListWithOption> {
     this.logger.debug(
       `Fetching store items for category slug: ${categorySlug} with translations for language: ${language}`,
     );
     try {
-      const items = await this.storeItemRepository.findStoreItemsByCategorySlugWithTranslation(categorySlug, language);
+      const items = await this.storeItemRepository.findStoreItemsByCategorySlugWithTranslation(
+        categorySlug,
+        mapLanguage(language),
+      );
       if (!items || items.length === 0) {
         this.logger.warn(`No store items found for category slug: ${categorySlug} and language: ${language}`);
         return { data: [] };
@@ -70,10 +130,10 @@ export class StoreItemService {
   }
 
   // get store item by id with translations for a specific language
-  async getStoreItemByIdWithTranslation(itemId: string, language: LanguageEnum): Promise<StoreItemWithOption | null> {
+  async getStoreItemByIdWithTranslation(itemId: string, language: number): Promise<StoreItemWithOption | null> {
     this.logger.debug(`Fetching store item for id: ${itemId} with translations for language: ${language}`);
     try {
-      const item = await this.storeItemRepository.findStoreItemsByIdWithTranslation(itemId, language);
+      const item = await this.storeItemRepository.findStoreItemsByIdWithTranslation(itemId, mapLanguage(language));
       if (!item) {
         this.logger.warn(`No store item found for id: ${itemId} and language: ${language}`);
         return null;
@@ -136,7 +196,7 @@ export class StoreItemService {
   async upsertStoreItemTranslation(data: StoreItemTranslationRequest): Promise<Id> {
     this.logger.debug(`Upserting translation for item: ${data.itemId}, language: ${data.language}`);
     try {
-      await this.storeItemRepository.upsertStoreItemTranslation(data);
+      await this.storeItemRepository.upsertStoreItemTranslation({ ...data, language: mapLanguage(data.language) });
       // repo returns void; returning itemId as the closest stable identifier
       return { id: data.itemId };
     } catch (error) {
@@ -260,7 +320,10 @@ export class StoreItemService {
       `Upserting item attribute translation for item_attribute: ${data.itemAttributeId}, language: ${data.language}`,
     );
     try {
-      return await this.storeItemRepository.upsertItemAttributeTranslation(data);
+      return await this.storeItemRepository.upsertItemAttributeTranslation({
+        ...data,
+        language: mapLanguage(data.language),
+      });
     } catch (error) {
       this.logger.error(
         `Error upserting item attribute translation: ${error instanceof Error ? error.message : error}`,
@@ -273,7 +336,12 @@ export class StoreItemService {
   async addVariantPrice(data: AddVariantPriceRequest): Promise<Id> {
     this.logger.debug(`Adding variant price for item_attribute: ${data.itemAttributeId}`);
     try {
-      return await this.storeItemRepository.addVariantPrice(data);
+      return await this.storeItemRepository.addVariantPrice({
+        itemAttributeId: data.itemAttributeId,
+        priceType: mapPriceType(data.priceType),
+        value: data.value,
+        currency: mapCurrency(data.currency || 4),
+      });
     } catch (error) {
       this.logger.error(`Error adding variant price: ${error instanceof Error ? error.message : error}`);
       throw AppError.internalServerError('Failed to add variant price');
@@ -296,7 +364,12 @@ export class StoreItemService {
   async addStoreItemBasePrice(data: AddStoreItemBasePriceRequest): Promise<Id> {
     this.logger.debug(`Adding base price to store item: ${data.itemId}`);
     try {
-      return await this.storeItemRepository.addStoreItemBasePrice(data);
+      return await this.storeItemRepository.addStoreItemBasePrice({
+        itemId: data.itemId,
+        priceType: mapPriceType(data.priceType),
+        value: data.value,
+        currency: mapCurrency(data.currency || 4),
+      });
     } catch (error) {
       this.logger.error(`Error adding store item base price: ${error instanceof Error ? error.message : error}`);
       throw AppError.internalServerError('Failed to add store item base price');

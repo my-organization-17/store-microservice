@@ -11,6 +11,37 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "store_item.v1";
 
+/** PriceType enumeration for different types of prices */
+export enum PriceType {
+  PRICE_TYPE_UNSPECIFIED = 0,
+  PRICE_TYPE_REGULAR = 1,
+  PRICE_TYPE_DISCOUNT = 2,
+  PRICE_TYPE_WHOLESALE = 3,
+  UNRECOGNIZED = -1,
+}
+
+/** Language enumeration for supported languages */
+export enum Language {
+  LANGUAGE_UNSPECIFIED = 0,
+  LANGUAGE_EN = 1,
+  LANGUAGE_UA = 2,
+  LANGUAGE_RU = 3,
+  LANGUAGE_DE = 4,
+  LANGUAGE_ES = 5,
+  LANGUAGE_FR = 6,
+  UNRECOGNIZED = -1,
+}
+
+/** Currency enumeration for supported currencies */
+export enum Currency {
+  CURRENCY_UNSPECIFIED = 0,
+  CURRENCY_USD = 1,
+  CURRENCY_EUR = 2,
+  CURRENCY_GBP = 3,
+  CURRENCY_UAH = 4,
+  UNRECOGNIZED = -1,
+}
+
 /** declaration of Id message */
 export interface Id {
   id: string;
@@ -19,19 +50,19 @@ export interface Id {
 /** declaration of GetStoreItemsByCategoryIdRequest message */
 export interface GetStoreItemsByCategoryIdRequest {
   categoryId: string;
-  language: string;
+  language: Language;
 }
 
 /** declaration of GetStoreItemsByCategorySlugRequest message */
 export interface GetStoreItemsByCategorySlugRequest {
   categorySlug: string;
-  language: string;
+  language: Language;
 }
 
 /** declaration of GetStoreItemByIdRequest message */
 export interface GetStoreItemByIdRequest {
   itemId: string;
-  language: string;
+  language: Language;
 }
 
 /** declaration of CreateStoreItemRequest message */
@@ -56,7 +87,7 @@ export interface UpdateStoreItemRequest {
 /** declaration of StoreItemTranslationRequest message */
 export interface StoreItemTranslationRequest {
   itemId: string;
-  language: string;
+  language: Language;
   title: string;
   description?: string | null | undefined;
   detailedDescription?: string | null | undefined;
@@ -97,7 +128,7 @@ export interface AddStoreItemVariantRequest {
  */
 export interface UpsertItemAttributeTranslationRequest {
   itemAttributeId: string;
-  language: string;
+  language: Language;
   value: string;
 }
 
@@ -107,17 +138,17 @@ export interface UpsertItemAttributeTranslationRequest {
  */
 export interface AddVariantPriceRequest {
   itemAttributeId: string;
-  priceType: string;
+  priceType: PriceType;
   value: string;
-  currency?: string | null | undefined;
+  currency?: Currency | null | undefined;
 }
 
 /** declaration of AddStoreItemBasePriceRequest message */
 export interface AddStoreItemBasePriceRequest {
   itemId: string;
-  priceType: string;
+  priceType: PriceType;
   value: string;
-  currency?: string | null | undefined;
+  currency?: Currency | null | undefined;
 }
 
 /** Message representing a status response */
@@ -165,15 +196,15 @@ export interface ItemVariant {
   regularPrice?: string | null | undefined;
   discountPrice?: string | null | undefined;
   wholesalePrice?: string | null | undefined;
-  currency: string;
+  currency?: Currency | null | undefined;
 }
 
 /** Message representing a base price for items without variants */
 export interface ItemBasePrice {
   id: string;
-  priceType: string;
+  priceType: PriceType;
   value: string;
-  currency: string;
+  currency?: Currency | null | undefined;
 }
 
 /** Message representing an image for a store item */

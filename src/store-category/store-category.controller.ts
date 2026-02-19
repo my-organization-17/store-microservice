@@ -14,7 +14,7 @@ import {
   type StoreCategoryWithTranslations,
   type UpdateStoreCategoryRequest,
 } from 'src/generated-types/store-category';
-import type { LanguageEnum } from 'src/database/language.enum';
+import type { LanguageEnum } from 'src/database/enums/language.enum';
 
 @Controller()
 export class StoreCategoryController {

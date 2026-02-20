@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { AppError } from 'src/utils/errors/app-error';
+import { mapLanguageFromProto, mapLanguageToProto } from 'src/utils/mapper';
 import { StoreAttributeRepository } from './store-attribute.repository';
+
 import type {
   AttributeList,
   AttributeResponse,
@@ -12,7 +14,6 @@ import type {
   StatusResponse,
   UpdateAttributeRequest,
 } from 'src/generated-types/store-attribute';
-import type { LanguageEnum } from 'src/database/enums/language.enum';
 
 @Injectable()
 export class StoreAttributeService {
@@ -31,7 +32,7 @@ export class StoreAttributeService {
           sortOrder: attr.sortOrder,
           translations: attr.translations.map((t) => ({
             id: t.id,
-            language: t.language,
+            language: mapLanguageToProto(t.language),
             name: t.name,
           })),
         })),
@@ -126,7 +127,7 @@ export class StoreAttributeService {
     try {
       await this.storeAttributeRepository.createOrUpdateAttributeTranslation({
         attributeId: data.attributeId,
-        language: data.language as LanguageEnum,
+        language: mapLanguageFromProto(data.language),
         name: data.name,
       });
       return { id: data.attributeId };

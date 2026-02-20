@@ -7,6 +7,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
+import { Language } from "./store-item";
 
 export const protobufPackage = "store_attribute.v1";
 
@@ -51,7 +52,7 @@ export interface AttributeWithTranslations {
 /** Message representing an attribute translation */
 export interface AttributeTranslationResponse {
   id: string;
-  language: string;
+  language: Language;
   name: string;
 }
 
@@ -76,7 +77,7 @@ export interface ChangeAttributePositionRequest {
 /** Message for creating or updating an attribute translation */
 export interface AttributeTranslationRequest {
   attributeId: string;
-  language: string;
+  language: Language;
   name: string;
 }
 

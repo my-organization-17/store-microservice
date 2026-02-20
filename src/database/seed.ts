@@ -80,25 +80,25 @@ async function seed() {
 
   // ── 2. Category Translations (→ category) ──
   await db.insert(categoryTranslation).values([
-    { categoryId: catCoffeeId, language: 'en', title: 'Coffee Beans', description: 'Freshly roasted coffee' },
-    { categoryId: catCoffeeId, language: 'ua', title: 'Кавові зерна', description: 'Свіжообсмажена кава' },
-    { categoryId: catEquipmentId, language: 'en', title: 'Brewing Equipment', description: 'Tools for coffee brewing' },
+    { categoryId: catCoffeeId, language: 'EN', title: 'Coffee Beans', description: 'Freshly roasted coffee' },
+    { categoryId: catCoffeeId, language: 'UA', title: 'Кавові зерна', description: 'Свіжообсмажена кава' },
+    { categoryId: catEquipmentId, language: 'EN', title: 'Brewing Equipment', description: 'Tools for coffee brewing' },
     {
       categoryId: catEquipmentId,
-      language: 'ua',
+      language: 'UA',
       title: 'Обладнання',
       description: 'Інструменти для приготування кави',
     },
     {
       categoryId: catTeaId,
-      language: 'en',
+      language: 'EN',
       title: 'Leaf Tea',
       description:
         'Natural black, green, herbal and fruit teas of the German TM SOHO. Made without the addition of dyes, artificial flavors, preservatives',
     },
     {
       categoryId: catTeaId,
-      language: 'ua',
+      language: 'UA',
       title: 'Листяний чай',
       description:
         "Натуральні чорні, зелені, трав'яні та фруктові чаї німецької торгівельної марки SOHO. Виготовлені без додавання барвників, штучних ароматизаторів, консервантів",
@@ -117,18 +117,18 @@ async function seed() {
 
   // ── 4. Attribute Translations (→ attribute) ──
   await db.insert(attributeTranslation).values([
-    { attributeId: attrWeightId, language: 'en', name: 'Weight' },
-    { attributeId: attrWeightId, language: 'ua', name: 'Вага' },
-    { attributeId: attrRoastId, language: 'en', name: 'Roast Level' },
-    { attributeId: attrRoastId, language: 'ua', name: 'Ступінь обсмаження' },
-    { attributeId: attrMaterialId, language: 'en', name: 'Material' },
-    { attributeId: attrMaterialId, language: 'ua', name: 'Матеріал' },
-    { attributeId: attrOriginId, language: 'en', name: 'Origin' },
-    { attributeId: attrOriginId, language: 'ua', name: 'Походження' },
-    { attributeId: attrProcessingTypeId, language: 'en', name: 'Processing Type' },
-    { attributeId: attrProcessingTypeId, language: 'ua', name: 'Тип обробки' },
-    { attributeId: attrScoreId, language: 'en', name: 'Score' },
-    { attributeId: attrScoreId, language: 'ua', name: 'Оцінка' },
+    { attributeId: attrWeightId, language: 'EN', name: 'Weight' },
+    { attributeId: attrWeightId, language: 'UA', name: 'Вага' },
+    { attributeId: attrRoastId, language: 'EN', name: 'Roast Level' },
+    { attributeId: attrRoastId, language: 'UA', name: 'Ступінь обсмаження' },
+    { attributeId: attrMaterialId, language: 'EN', name: 'Material' },
+    { attributeId: attrMaterialId, language: 'UA', name: 'Матеріал' },
+    { attributeId: attrOriginId, language: 'EN', name: 'Origin' },
+    { attributeId: attrOriginId, language: 'UA', name: 'Походження' },
+    { attributeId: attrProcessingTypeId, language: 'EN', name: 'Processing Type' },
+    { attributeId: attrProcessingTypeId, language: 'UA', name: 'Тип обробки' },
+    { attributeId: attrScoreId, language: 'EN', name: 'Score' },
+    { attributeId: attrScoreId, language: 'UA', name: 'Оцінка' },
   ]);
 
   // ── 5. Items (→ category) ──
@@ -164,24 +164,24 @@ async function seed() {
   await db.insert(itemTranslation).values([
     {
       itemId: itemEthiopiaId,
-      language: 'en',
+      language: 'EN',
       title: 'Ethiopia Yirgacheffe',
       description: 'Fruity and floral',
       detailedDescription: 'Single origin from Yirgacheffe region with notes of blueberry and jasmine.',
     },
     {
       itemId: itemEthiopiaId,
-      language: 'ua',
+      language: 'UA',
       title: 'Ефіопія Їргачеффе',
       description: 'Фруктовий та квітковий',
       detailedDescription: 'Моносорт з регіону Їргачеффе з нотами чорниці та жасмину.',
     },
-    { itemId: itemColombiaId, language: 'en', title: 'Colombia Supremo', description: 'Rich and balanced' },
-    { itemId: itemColombiaId, language: 'ua', title: 'Колумбія Супремо', description: 'Насичений та збалансований' },
-    { itemId: itemHondurasId, language: 'en', title: 'Honduras Copan', description: 'Chocolatey and nutty' },
-    { itemId: itemHondurasId, language: 'ua', title: 'Гондурас Копан', description: 'Шоколадний та горіховий' },
-    { itemId: itemV60Id, language: 'en', title: 'Hario V60 Dripper', description: 'Pour-over coffee dripper' },
-    { itemId: itemV60Id, language: 'ua', title: 'Hario V60 Дріпер', description: 'Дріпер для кави' },
+    { itemId: itemColombiaId, language: 'EN', title: 'Colombia Supremo', description: 'Rich and balanced' },
+    { itemId: itemColombiaId, language: 'UA', title: 'Колумбія Супремо', description: 'Насичений та збалансований' },
+    { itemId: itemHondurasId, language: 'EN', title: 'Honduras Copan', description: 'Chocolatey and nutty' },
+    { itemId: itemHondurasId, language: 'UA', title: 'Гондурас Копан', description: 'Шоколадний та горіховий' },
+    { itemId: itemV60Id, language: 'EN', title: 'Hario V60 Dripper', description: 'Pour-over coffee dripper' },
+    { itemId: itemV60Id, language: 'UA', title: 'Hario V60 Дріпер', description: 'Дріпер для кави' },
   ]);
 
   // ── 7. Images (→ item) ──
@@ -210,26 +210,26 @@ async function seed() {
 
   // ── 9. Item Attribute Translations (→ itemAttribute) ──
   await db.insert(itemAttributeTranslation).values([
-    { itemAttributeId: iaEthiopiaWeightId, language: 'en', value: '250g' },
-    { itemAttributeId: iaEthiopiaWeightId, language: 'ua', value: '250г' },
-    { itemAttributeId: iaEthiopiaRoastId, language: 'en', value: 'Medium' },
-    { itemAttributeId: iaEthiopiaRoastId, language: 'ua', value: 'Середній' },
-    { itemAttributeId: iaColombiaWeightIdLarge, language: 'en', value: '1kg' },
-    { itemAttributeId: iaColombiaWeightIdLarge, language: 'ua', value: '1кг' },
-    { itemAttributeId: iaColombiaWeightIdMedium, language: 'en', value: '500g' },
-    { itemAttributeId: iaColombiaWeightIdMedium, language: 'ua', value: '500г' },
-    { itemAttributeId: iaColombiaWeightIdSmall, language: 'en', value: '250g' },
-    { itemAttributeId: iaColombiaWeightIdSmall, language: 'ua', value: '250г' },
-    { itemAttributeId: iaHondurasRoastId, language: 'en', value: 'Medium' },
-    { itemAttributeId: iaHondurasRoastId, language: 'ua', value: 'Середній' },
-    { itemAttributeId: iaHondurasOriginId, language: 'en', value: 'Copan' },
-    { itemAttributeId: iaHondurasOriginId, language: 'ua', value: 'Копан' },
-    { itemAttributeId: iaHondurasProcessingTypeId, language: 'en', value: 'Washed' },
-    { itemAttributeId: iaHondurasProcessingTypeId, language: 'ua', value: 'Митий' },
-    { itemAttributeId: iaHondurasScoreId, language: 'en', value: '85' },
-    { itemAttributeId: iaHondurasScoreId, language: 'ua', value: '85' },
-    { itemAttributeId: iaV60MaterialId, language: 'en', value: 'Ceramic' },
-    { itemAttributeId: iaV60MaterialId, language: 'ua', value: 'Кераміка' },
+    { itemAttributeId: iaEthiopiaWeightId, language: 'EN', value: '250g' },
+    { itemAttributeId: iaEthiopiaWeightId, language: 'UA', value: '250г' },
+    { itemAttributeId: iaEthiopiaRoastId, language: 'EN', value: 'Medium' },
+    { itemAttributeId: iaEthiopiaRoastId, language: 'UA', value: 'Середній' },
+    { itemAttributeId: iaColombiaWeightIdLarge, language: 'EN', value: '1kg' },
+    { itemAttributeId: iaColombiaWeightIdLarge, language: 'UA', value: '1кг' },
+    { itemAttributeId: iaColombiaWeightIdMedium, language: 'EN', value: '500g' },
+    { itemAttributeId: iaColombiaWeightIdMedium, language: 'UA', value: '500г' },
+    { itemAttributeId: iaColombiaWeightIdSmall, language: 'EN', value: '250g' },
+    { itemAttributeId: iaColombiaWeightIdSmall, language: 'UA', value: '250г' },
+    { itemAttributeId: iaHondurasRoastId, language: 'EN', value: 'Medium' },
+    { itemAttributeId: iaHondurasRoastId, language: 'UA', value: 'Середній' },
+    { itemAttributeId: iaHondurasOriginId, language: 'EN', value: 'Copan' },
+    { itemAttributeId: iaHondurasOriginId, language: 'UA', value: 'Копан' },
+    { itemAttributeId: iaHondurasProcessingTypeId, language: 'EN', value: 'Washed' },
+    { itemAttributeId: iaHondurasProcessingTypeId, language: 'UA', value: 'Митий' },
+    { itemAttributeId: iaHondurasScoreId, language: 'EN', value: '85' },
+    { itemAttributeId: iaHondurasScoreId, language: 'UA', value: '85' },
+    { itemAttributeId: iaV60MaterialId, language: 'EN', value: 'Ceramic' },
+    { itemAttributeId: iaV60MaterialId, language: 'UA', value: 'Кераміка' },
   ]);
 
   // ── 10. Item Prices (→ item + itemAttribute?) ──

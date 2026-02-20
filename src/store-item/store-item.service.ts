@@ -5,7 +5,6 @@ import { DEFAULT_LANGUAGE } from 'src/database/enums/language.enum';
 import { StoreItemRepository } from './store-item.repository';
 import { mapItem, mapItemsToResponse } from './store-item.mapper';
 
-import type { Currency, LanguageEnum, PriceType } from 'src/database/enums';
 import type {
   AddStoreItemBasePriceRequest,
   AddStoreItemImageRequest,
@@ -22,59 +21,7 @@ import type {
   UpdateStoreItemRequest,
   UpsertItemAttributeTranslationRequest,
 } from 'src/generated-types/store-item';
-
-// Proto Language integer → DB LanguageEnum string
-// LANGUAGE_EN = 1, LANGUAGE_UA = 2, LANGUAGE_RU = 3, LANGUAGE_DE = 4, LANGUAGE_ES = 5, LANGUAGE_FR = 6
-function mapLanguage(language: number): LanguageEnum {
-  switch (language) {
-    case 1:
-      return 'en';
-    case 2:
-      return 'ua';
-    case 3:
-      return 'ru';
-    case 4:
-      return 'de';
-    case 5:
-      return 'es';
-    case 6:
-      return 'fr';
-    default:
-      throw new Error(`Unsupported language: ${language}`);
-  }
-}
-
-// Proto PriceType integer → DB PriceType string
-// PRICE_TYPE_REGULAR = 1, PRICE_TYPE_DISCOUNT = 2, PRICE_TYPE_WHOLESALE = 3
-function mapPriceType(priceType: number): PriceType {
-  switch (priceType) {
-    case 1:
-      return 'regular';
-    case 2:
-      return 'discount';
-    case 3:
-      return 'wholesale';
-    default:
-      throw new Error(`Unsupported price type: ${priceType}`);
-  }
-}
-
-// Proto Currency integer → DB Currency string
-// CURRENCY_USD = 1, CURRENCY_EUR = 2, CURRENCY_GBP = 3, CURRENCY_UAH = 4
-function mapCurrency(currency: number): Currency {
-  switch (currency) {
-    case 1:
-      return 'USD';
-    case 2:
-      return 'EUR';
-    case 3:
-      return 'GBP';
-    case 4:
-      return 'UAH';
-    default:
-      throw new Error(`Unsupported currency: ${currency}`);
-  }
-}
+import { mapCurrency, mapLanguageFromProto, mapPriceType } from 'src/utils/mapper';
 
 @Injectable()
 export class StoreItemService {
@@ -92,7 +39,7 @@ export class StoreItemService {
     try {
       const items = await this.storeItemRepository.findStoreItemsByCategoryIdWithTranslation(
         categoryId,
-        mapLanguage(language),
+        mapLanguageFromProto(language),
       );
       if (!items || items.length === 0) {
         this.logger.warn(`No store items found for category id: ${categoryId} and language: ${language}`);
@@ -116,7 +63,7 @@ export class StoreItemService {
     try {
       const items = await this.storeItemRepository.findStoreItemsByCategorySlugWithTranslation(
         categorySlug,
-        mapLanguage(language),
+        mapLanguageFromProto(language),
       );
       if (!items || items.length === 0) {
         this.logger.warn(`No store items found for category slug: ${categorySlug} and language: ${language}`);
@@ -133,7 +80,10 @@ export class StoreItemService {
   async getStoreItemByIdWithTranslation(itemId: string, language: number): Promise<StoreItemWithOption | null> {
     this.logger.debug(`Fetching store item for id: ${itemId} with translations for language: ${language}`);
     try {
-      const item = await this.storeItemRepository.findStoreItemsByIdWithTranslation(itemId, mapLanguage(language));
+      const item = await this.storeItemRepository.findStoreItemsByIdWithTranslation(
+        itemId,
+        mapLanguageFromProto(language),
+      );
       if (!item) {
         this.logger.warn(`No store item found for id: ${itemId} and language: ${language}`);
         return null;
@@ -196,7 +146,10 @@ export class StoreItemService {
   async upsertStoreItemTranslation(data: StoreItemTranslationRequest): Promise<Id> {
     this.logger.debug(`Upserting translation for item: ${data.itemId}, language: ${data.language}`);
     try {
-      await this.storeItemRepository.upsertStoreItemTranslation({ ...data, language: mapLanguage(data.language) });
+      await this.storeItemRepository.upsertStoreItemTranslation({
+        ...data,
+        language: mapLanguageFromProto(data.language),
+      });
       // repo returns void; returning itemId as the closest stable identifier
       return { id: data.itemId };
     } catch (error) {
@@ -322,7 +275,7 @@ export class StoreItemService {
     try {
       return await this.storeItemRepository.upsertItemAttributeTranslation({
         ...data,
-        language: mapLanguage(data.language),
+        language: mapLanguageFromProto(data.language),
       });
     } catch (error) {
       this.logger.error(

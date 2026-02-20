@@ -7,12 +7,13 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
+import { Language as Language1 } from "./store-item";
 
 export const protobufPackage = "store_category.v1";
 
 /** declaration of Language message */
 export interface Language {
-  language: string;
+  language: Language1;
 }
 
 /** declaration of Id message */
@@ -54,7 +55,7 @@ export interface StoreCategoryTranslation {
   id: string;
   title: string;
   description: string;
-  language: string;
+  language: Language1;
 }
 
 /** Message representing a store category with its translation */
@@ -88,7 +89,7 @@ export interface StoreCategoryTranslationRequest {
   categoryId: string;
   title: string;
   description?: string | null | undefined;
-  language: string;
+  language: Language1;
 }
 
 export const STORE_CATEGORY_V1_PACKAGE_NAME = "store_category.v1";
@@ -102,7 +103,7 @@ export interface StoreCategoryServiceClient {
 
   /** rpc to get a store category by its ID */
 
-  getStoreCategoryById(request: Id): Observable<StoreCategoryWithTranslation>;
+  getStoreCategoryById(request: Id): Observable<StoreCategoryWithTranslations>;
 
   /** rpc to create a new store category */
 
@@ -142,7 +143,7 @@ export interface StoreCategoryServiceController {
 
   getStoreCategoryById(
     request: Id,
-  ): Promise<StoreCategoryWithTranslation> | Observable<StoreCategoryWithTranslation> | StoreCategoryWithTranslation;
+  ): Promise<StoreCategoryWithTranslations> | Observable<StoreCategoryWithTranslations> | StoreCategoryWithTranslations;
 
   /** rpc to create a new store category */
 

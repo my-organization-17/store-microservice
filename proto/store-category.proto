@@ -2,12 +2,14 @@ syntax = "proto3";
 
 package store_category.v1;
 
+import "store-item.proto";
+
 // StoreCategoryService defines the gRPC service for managing store categories.
 service StoreCategoryService {
   // rpc to get store categories by language
   rpc GetStoreCategoriesByLanguage(Language) returns (StoreCategoryList) {}
   // rpc to get a store category by its ID
-  rpc GetStoreCategoryById(Id) returns (StoreCategoryWithTranslation) {}
+  rpc GetStoreCategoryById(Id) returns (StoreCategoryWithTranslations) {}
   // rpc to create a new store category
   rpc CreateStoreCategory(CreateStoreCategoryRequest) returns (Id) {}
   // rpc to update an existing store category
@@ -24,7 +26,7 @@ service StoreCategoryService {
 
 // declaration of Language message
 message Language {
-  string language = 1;
+  store_item.v1.Language language = 1;
 }
 
 // declaration of Id message
@@ -66,7 +68,7 @@ message StoreCategoryTranslation {
   string id = 1;
   string title = 2;
   string description = 3;
-  string language = 4;
+  store_item.v1.Language language = 4;
 }
 
 // Message representing a store category with its translation
@@ -100,7 +102,7 @@ message StoreCategoryTranslationRequest {
   string category_id = 1;
   string title = 2;
   optional string description = 3;
-  string language = 4;
+  store_item.v1.Language language = 4;
 }
 
 // Command to generate TypeScript code with NestJS options, using null for optional fields and Date for timestamps

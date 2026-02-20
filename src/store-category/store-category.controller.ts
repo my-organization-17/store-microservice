@@ -6,6 +6,7 @@ import {
   type ChangeStoreCategoryPositionRequest,
   type CreateStoreCategoryRequest,
   type Id,
+  type Language,
   type StatusResponse,
   STORE_CATEGORY_SERVICE_NAME,
   type StoreCategory,
@@ -14,7 +15,6 @@ import {
   type StoreCategoryWithTranslations,
   type UpdateStoreCategoryRequest,
 } from 'src/generated-types/store-category';
-import type { LanguageEnum } from 'src/database/enums/language.enum';
 
 @Controller()
 export class StoreCategoryController {
@@ -28,9 +28,9 @@ export class StoreCategoryController {
   }
 
   @GrpcMethod(STORE_CATEGORY_SERVICE_NAME, 'GetStoreCategoriesByLanguage')
-  async getStoreCategoryListWithTranslation(data: { language: LanguageEnum }): Promise<StoreCategoryList> {
+  async getStoreCategoryListWithTranslation(data: Language): Promise<StoreCategoryList> {
     this.logger.debug(`Received request to find all store categories with translations for language: ${data.language}`);
-    return await this.storeCategoryService.findStoreCategoryListWithTranslation(data.language);
+    return await this.storeCategoryService.findStoreCategoryListWithTranslation(data);
   }
 
   @GrpcMethod(STORE_CATEGORY_SERVICE_NAME, 'CreateStoreCategory')

@@ -1,12 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { AppError } from 'src/utils/errors/app-error';
+import { mapLanguageFromProto, mapLanguageToProto } from 'src/utils/mapper';
 import { StoreCategoryRepository } from './store-category.repository';
 
 import type {
   ChangeStoreCategoryPositionRequest,
   CreateStoreCategoryRequest,
   Id,
+  Language,
   StatusResponse,
   StoreCategory,
   StoreCategoryList,
@@ -14,7 +16,6 @@ import type {
   StoreCategoryWithTranslations,
   UpdateStoreCategoryRequest,
 } from 'src/generated-types/store-category';
-import type { LanguageEnum } from 'src/database/enums/language.enum';
 
 @Injectable()
 export class StoreCategoryService {
@@ -40,7 +41,7 @@ export class StoreCategoryService {
           id: tx.id,
           title: tx.title,
           description: tx.description ?? '',
-          language: tx.language,
+          language: mapLanguageToProto(tx.language),
         })),
       };
     } catch (error) {
@@ -50,10 +51,12 @@ export class StoreCategoryService {
     }
   }
 
-  async findStoreCategoryListWithTranslation(language: LanguageEnum): Promise<StoreCategoryList> {
+  async findStoreCategoryListWithTranslation({ language }: Language): Promise<StoreCategoryList> {
     this.logger.debug(`Finding all store categories with translations for language: ${language}`);
     try {
-      const categories = await this.storeCategoryRepository.findStoreCategoryListWithTranslation(language);
+      const categories = await this.storeCategoryRepository.findStoreCategoryListWithTranslation(
+        mapLanguageFromProto(language),
+      );
 
       if (categories.length === 0) {
         this.logger.warn(`No store categories found for language: ${language}`);
@@ -187,7 +190,7 @@ export class StoreCategoryService {
     try {
       await this.storeCategoryRepository.createOrUpdateStoreCategoryTranslation({
         ...data,
-        language: data.language as LanguageEnum,
+        language: mapLanguageFromProto(data.language),
       });
       return { id: data.categoryId };
     } catch (error) {

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package store_attribute.v1;
 
+import "store-item.proto";
+
 // StoreAttributeService defines the gRPC service for managing store attributes.
 service StoreAttributeService {
   // rpc to get all attributes for a category
@@ -61,7 +63,7 @@ message AttributeWithTranslations {
 // Message representing an attribute translation
 message AttributeTranslationResponse {
   string id = 1;
-  string language = 2;
+  store_item.v1.Language language = 2;
   string name = 3;
 }
 
@@ -86,7 +88,7 @@ message ChangeAttributePositionRequest {
 // Message for creating or updating an attribute translation
 message AttributeTranslationRequest {
   string attribute_id = 1;
-  string language = 2;
+  store_item.v1.Language language = 2;
   string name = 3;
 }
 

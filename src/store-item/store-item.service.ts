@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { AppError } from 'src/utils/errors/app-error';
+import { DEFAULT_LANGUAGE } from 'src/database/enums/language.enum';
 import { StoreItemRepository } from './store-item.repository';
-import { DEFAULT_LANGUAGE, type LanguageEnum } from 'src/database/enums/language.enum';
-import type { PriceType as DbPriceType } from 'src/database/enums/price-type.enum';
-import type { Currency as DbCurrency } from 'src/database/enums/currency.enum';
+import { mapItem, mapItemsToResponse } from './store-item.mapper';
+
+import type { Currency, LanguageEnum, PriceType } from 'src/database/enums';
 import type {
   AddStoreItemBasePriceRequest,
   AddStoreItemImageRequest,
@@ -21,7 +22,6 @@ import type {
   UpdateStoreItemRequest,
   UpsertItemAttributeTranslationRequest,
 } from 'src/generated-types/store-item';
-import { mapItem, mapItemsToResponse } from './store-item.mapper';
 
 // Proto Language integer → DB LanguageEnum string
 // LANGUAGE_EN = 1, LANGUAGE_UA = 2, LANGUAGE_RU = 3, LANGUAGE_DE = 4, LANGUAGE_ES = 5, LANGUAGE_FR = 6
@@ -46,7 +46,7 @@ function mapLanguage(language: number): LanguageEnum {
 
 // Proto PriceType integer → DB PriceType string
 // PRICE_TYPE_REGULAR = 1, PRICE_TYPE_DISCOUNT = 2, PRICE_TYPE_WHOLESALE = 3
-function mapPriceType(priceType: number): DbPriceType {
+function mapPriceType(priceType: number): PriceType {
   switch (priceType) {
     case 1:
       return 'regular';
@@ -61,7 +61,7 @@ function mapPriceType(priceType: number): DbPriceType {
 
 // Proto Currency integer → DB Currency string
 // CURRENCY_USD = 1, CURRENCY_EUR = 2, CURRENCY_GBP = 3, CURRENCY_UAH = 4
-function mapCurrency(currency: number): DbCurrency {
+function mapCurrency(currency: number): Currency {
   switch (currency) {
     case 1:
       return 'USD';

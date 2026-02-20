@@ -3,13 +3,11 @@ import { drizzle } from 'drizzle-orm/mysql2';
 import { and, asc, eq, max } from 'drizzle-orm';
 
 import * as schema from 'src/database/schema';
-import type { LanguageEnum } from 'src/database/enums/language.enum';
-import type { Currency, PriceType } from 'src/database/enums';
+import type { Currency, LanguageEnum, PriceType } from 'src/database/enums';
 import type {
   AddStoreItemImageRequest,
   AddStoreItemVariantRequest,
   CreateStoreItemRequest,
-  Id,
   UpdateStoreItemRequest,
 } from 'src/generated-types/store-item';
 
@@ -146,7 +144,7 @@ export class StoreItemRepository {
   }
 
   // create store item
-  async createStoreItem(data: CreateStoreItemRequest): Promise<Id> {
+  async createStoreItem(data: CreateStoreItemRequest): Promise<{ id: string }> {
     this.logger.debug(`Creating store item with data: ${JSON.stringify(data)}`);
     return await this.drizzleDb.transaction(async (tx) => {
       const [{ maxOrder }] = await tx
@@ -247,7 +245,7 @@ export class StoreItemRepository {
   }
 
   // add store item image and return the new image id
-  async addStoreItemImage(data: AddStoreItemImageRequest): Promise<Id> {
+  async addStoreItemImage(data: AddStoreItemImageRequest): Promise<{ id: string }> {
     const { itemId, url } = data;
     this.logger.debug(`Adding image to store item with id: ${itemId}, imageUrl: ${url}`);
     const [created] = await this.drizzleDb
@@ -295,7 +293,7 @@ export class StoreItemRepository {
   }
 
   // link an existing attribute to a store item (admin flow step 6)
-  async addStoreItemVariant(data: AddStoreItemVariantRequest): Promise<Id> {
+  async addStoreItemVariant(data: AddStoreItemVariantRequest): Promise<{ id: string }> {
     this.logger.debug(`Linking attribute ${data.attributeId} to item ${data.itemId}`);
     const [created] = await this.drizzleDb
       .insert(schema.itemAttribute)
@@ -309,7 +307,7 @@ export class StoreItemRepository {
     itemAttributeId: string;
     language: LanguageEnum;
     value: string;
-  }): Promise<Id> {
+  }): Promise<{ id: string }> {
     this.logger.debug(
       `Upserting item attribute translation for item_attribute ${data.itemAttributeId}, language: ${data.language}`,
     );
@@ -326,7 +324,7 @@ export class StoreItemRepository {
     priceType: PriceType;
     value: string;
     currency: Currency;
-  }): Promise<Id> {
+  }): Promise<{ id: string }> {
     this.logger.debug(`Adding variant price for item_attribute ${data.itemAttributeId}: ${JSON.stringify(data)}`);
     const itemAttribute = await this.drizzleDb.query.itemAttribute.findFirst({
       where: eq(schema.itemAttribute.id, data.itemAttributeId),
@@ -365,7 +363,7 @@ export class StoreItemRepository {
     priceType: PriceType;
     value: string;
     currency: Currency;
-  }): Promise<Id> {
+  }): Promise<{ id: string }> {
     this.logger.debug(`Adding base price to item ${data.itemId}: ${JSON.stringify(data)}`);
     const [created] = await this.drizzleDb
       .insert(schema.itemPrice)
